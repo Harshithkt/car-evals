@@ -1,0 +1,17 @@
+# ML runtime (from artifacts/requirements.txt as written by notebook cell 13.1)
+torch
+torchvision
+timm
+ultralytics
+opencv-python-headless
+scikit-image
+scikit-learn
+scipy
+joblib
+numpy
+Pillow
+onnxruntime
+# API
+fastapi
+uvicorn[standard]
+python-multipart

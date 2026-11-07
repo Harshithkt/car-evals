@@ -1,0 +1,24 @@
+# Python / Node / OS
+.venv/
+__pycache__/
+*.pyc
+frontend/node_modules/
+frontend/dist/
+*.tsbuildinfo
+.DS_Store
+
+# Model files over GitHub's 100 MB limit, or not needed for inference.
+# The app runs with the committed INT8 classifier; add classifier_best.pth locally for PyTorch + Grad-CAM.
+artifacts/classifier_best.pth
+artifacts/classifier_fp32.onnx
+artifacts/classifier_fp16.pth
+artifacts/backup-*/
+artifacts/*.colab.py
+
+# Modal evaluation downloads
+modal_runs/
+
+# Raw Colab exports (already imported into artifacts/ and plots/)
+P5_artifacts*/
+P5_plots*/
+*.zip

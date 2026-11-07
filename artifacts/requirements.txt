@@ -1,0 +1,11 @@
+torch
+torchvision
+timm
+ultralytics
+opencv-python-headless
+scikit-image
+scikit-learn
+joblib
+numpy
+Pillow
+onnxruntime

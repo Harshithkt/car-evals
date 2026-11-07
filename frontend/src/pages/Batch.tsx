@@ -118,11 +118,11 @@ export default function Batch({ items, setItems, maxMb, hasOnnx }: {
             onClick={() => input.current?.click()}
             role="button" tabIndex={0} aria-label="Add images"
             onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && input.current?.click()}
-            className={`flex cursor-pointer items-center gap-4 rounded-xl border-2 border-dashed px-5 py-5 transition ${drag ? 'border-accent bg-accent-wash/30' : 'border-line hover:border-accent/60 hover:bg-surface-2/60'}`}
+            className={`flex cursor-pointer items-center gap-4 rounded-xl border-2 border-dashed px-5 py-5 transition ${drag ? 'border-ink bg-surface-2' : 'border-line hover:border-mist hover:bg-surface-2/60'}`}
           >
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent-wash/50 text-accent"><IconUpload className="h-5 w-5" /></span>
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface-2 text-ink"><IconUpload className="h-5 w-5" /></span>
             <div>
-              <div className="text-sm font-medium text-ink">Drop images here, or <span className="text-accent">browse</span></div>
+              <div className="text-sm font-medium text-ink">Drop images here, or <span className="text-ink">browse</span></div>
               <div className="text-xs text-muted">Select as many as you like · JPG, PNG, WEBP, BMP · up to {maxMb} MB each</div>
             </div>
             <input ref={input} type="file" multiple accept={ACCEPT.join(',')} className="hidden"
@@ -228,7 +228,7 @@ export default function Batch({ items, setItems, maxMb, hasOnnx }: {
                         </td>
                         <td className="px-2 py-2">
                           {it.state === 'queued' && <span className="text-muted">Queued</span>}
-                          {it.state === 'running' && <span className="inline-flex items-center gap-2 text-accent"><span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-accent/25 border-t-accent" /> Analysing…</span>}
+                          {it.state === 'running' && <span className="inline-flex items-center gap-2 text-ink"><span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-accent/25 border-t-accent" /> Analysing…</span>}
                           {it.state === 'error' && <span className="text-critical-ink">{it.error}</span>}
                           {it.state === 'done' && (v ? (
                             <span className="inline-flex items-center gap-1.5 text-ink">

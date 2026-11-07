@@ -151,13 +151,13 @@ export default function Recognize({ health, current, history, commit, restore, c
                 tabIndex={0}
                 aria-label="Upload an image"
                 className={`group flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-9 text-center transition-all ${
-                  drag ? 'scale-[1.01] border-accent bg-accent-wash/30' : 'border-line hover:border-accent/60 hover:bg-surface-2/60'
+                  drag ? 'scale-[1.01] border-ink bg-surface-2' : 'border-line hover:border-mist hover:bg-surface-2/60'
                 }`}
               >
-                <span className={`mb-3 flex h-12 w-12 items-center justify-center rounded-full transition-colors ${drag ? 'bg-accent text-white' : 'bg-accent-wash/50 text-accent group-hover:bg-accent group-hover:text-white'}`}>
+                <span className={`mb-3 flex h-12 w-12 items-center justify-center rounded-full transition-colors ${drag ? 'bg-accent text-white' : 'bg-surface-2 text-ink group-hover:bg-ink group-hover:text-white'}`}>
                   <IconUpload className="h-5 w-5" />
                 </span>
-                <div className="text-sm font-medium text-ink">{busy ? 'Analysing…' : <>Drop an image, or <span className="text-accent">browse</span></>}</div>
+                <div className="text-sm font-medium text-ink">{busy ? 'Analysing…' : <>Drop an image, or <span className="text-ink">browse</span></>}</div>
                 <div className="mt-1 text-xs text-muted">JPG, PNG, WEBP or BMP · up to {maxMb} MB · or paste</div>
                 <input ref={input} type="file" accept={ACCEPT.join(',')} className="hidden"
                   onChange={(e) => { const f = e.target.files?.[0]; if (f) run(f, f.name, { source: 'upload' }); e.target.value = '' }} />
@@ -199,7 +199,7 @@ export default function Recognize({ health, current, history, commit, restore, c
               <div className="grid grid-cols-3 gap-2">
                 {samples.map((s) => (
                   <button key={s.name} onClick={() => runSample(s)} disabled={busy} title={s.ground_truth ?? s.name}
-                    className="group relative overflow-hidden rounded-lg ring-1 ring-line transition hover:ring-2 hover:ring-accent focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-50">
+                    className="group relative overflow-hidden rounded-lg ring-1 ring-line transition hover:ring-2 hover:ring-ink focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-50">
                     <img src={api.sampleUrl(s)} alt={s.ground_truth ?? s.name} className="aspect-[4/3] w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                   </button>
                 ))}
@@ -312,7 +312,7 @@ export default function Recognize({ health, current, history, commit, restore, c
                   <Chip label="Classification" value={ms(result.timings_ms.classification)} />
                   <Chip label="Total" value={ms(result.timings_ms.total)} icon />
                   <span className="text-muted">{result.device.toUpperCase()} · {result.backend}</span>
-                  <button onClick={onShowPipeline} className="ml-auto inline-flex items-center gap-1.5 font-medium text-accent hover:underline print:hidden">
+                  <button onClick={onShowPipeline} className="ml-auto inline-flex items-center gap-1.5 font-medium text-ink underline decoration-mist underline-offset-4 hover:decoration-ink print:hidden">
                     <IconLayers className="h-3.5 w-3.5" /> Intermediate results <IconArrowRight className="h-3.5 w-3.5" />
                   </button>
                 </div>

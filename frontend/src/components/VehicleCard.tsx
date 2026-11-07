@@ -127,7 +127,7 @@ function RunnerUp({ insight }: { insight: NonNullable<ReturnType<typeof runnerUp
   const tone = insight.strength === 'narrow' ? 'text-warning-ink' : 'text-good-ink'
   return (
     <div className="rounded-xl border border-line bg-page p-4">
-      <div className="flex items-center gap-2 text-sm font-medium text-ink"><IconHelp className="h-4 w-4 text-accent" /> Why not the runner-up?</div>
+      <div className="flex items-center gap-2 text-sm font-medium text-ink"><IconHelp className="h-4 w-4 text-ink" /> Why not the runner-up?</div>
       <div className="mt-2 text-[13px] text-ink-2">
         <span className="font-medium text-ink">{insight.runnerUp}</span>
         <span className="ml-1.5 rounded-full border border-line px-1.5 py-px text-[11px]">{KIND_LABEL[insight.kind]}</span>
@@ -150,9 +150,9 @@ function WhatIf({ v, thresholds }: { v: Vehicle; thresholds: { tau?: number; tau
   return (
     <div className="rounded-xl border border-line bg-page p-4 print:hidden">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 text-sm font-medium text-ink"><IconSliders className="h-4 w-4 text-accent" /> Threshold playground</div>
+        <div className="flex items-center gap-2 text-sm font-medium text-ink"><IconSliders className="h-4 w-4 text-ink" /> Threshold playground</div>
         {(tau !== t0 || tauMake !== m0) && (
-          <button onClick={() => { setTau(t0); setTauMake(m0) }} className="text-xs text-accent hover:underline">Reset to deployed</button>
+          <button onClick={() => { setTau(t0); setTauMake(m0) }} className="text-xs text-ink underline decoration-mist underline-offset-4 hover:decoration-ink">Reset to deployed</button>
         )}
       </div>
       <p className="mt-1 text-xs text-muted">Re-applies the system's decision rule to this vehicle in your browser. The model is not re-run.</p>

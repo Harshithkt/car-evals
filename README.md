@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="frontend/public/logo.svg" alt="Logo: a car inside the corners of a detection box" width="88">
+
 # Fine-Grained Vehicle Recognition
 
 **Identify the make, model and year of a car from a single photo, across 196 classes.**
@@ -19,6 +21,7 @@ low-confidence handling and visual explanations, served as a FastAPI + React web
 ![ONNX](https://img.shields.io/badge/ONNX_Runtime-INT8-005CED?logo=onnx&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-backend-009688?logo=fastapi&logoColor=white)
 ![React](https://img.shields.io/badge/React_19-Vite_+_TypeScript-61DAFB?logo=react&logoColor=black)
+![Modal](https://img.shields.io/badge/Hosted_on-Modal-000000)
 
 <img src="docs/screenshots/landing.jpg" alt="Landing page" width="900">
 

@@ -94,7 +94,7 @@ export default function StressLab({ current }: { current: Analysis | null }) {
         <div className="flex flex-wrap items-center gap-3">
           {samples.map((s) => (
             <button key={s.name} onClick={() => pick(api.sampleUrl(s), `${s.name}.jpg`, s.ground_truth)} disabled={!!busy} title={s.ground_truth ?? s.name}
-              className={`overflow-hidden rounded-lg ring-1 transition hover:ring-2 hover:ring-accent disabled:opacity-50 ${source?.name === `${s.name}.jpg` ? 'ring-2 ring-accent' : 'ring-line'}`}>
+              className={`overflow-hidden rounded-lg ring-1 transition hover:ring-2 hover:ring-ink disabled:opacity-50 ${source?.name === `${s.name}.jpg` ? 'ring-2 ring-ink' : 'ring-line'}`}>
               <img src={api.sampleUrl(s)} alt={s.ground_truth ?? s.name} className="h-14 w-20 object-cover" />
             </button>
           ))}
@@ -110,7 +110,7 @@ export default function StressLab({ current }: { current: Analysis | null }) {
           <input ref={input} type="file" accept="image/jpeg,image/png,image/webp,image/bmp" className="hidden"
             onChange={(e) => { const f = e.target.files?.[0]; if (f) pick(URL.createObjectURL(f), f.name, null); e.target.value = '' }} />
         </div>
-        {busy === 'baseline' && <p className="mt-3 text-sm text-accent">Running the clean baseline…</p>}
+        {busy === 'baseline' && <p className="mt-3 text-sm text-ink">Running the clean baseline…</p>}
         {baseline && (
           <p className="mt-3 text-sm text-ink-2">
             Clean baseline: <b className="text-ink">{first(baseline)?.label ?? 'no vehicle'}</b> at {pct(first(baseline)?.confidence)}
@@ -129,7 +129,7 @@ export default function StressLab({ current }: { current: Analysis | null }) {
               <span className="self-center text-xs text-muted">Presets:</span>
               {PRESETS.map((p) => (
                 <button key={p.label} onClick={() => { setKind(p.kind); setSeverity(p.severity) }}
-                  className={`rounded-full border px-3 py-1 text-xs transition ${kind === p.kind && severity === p.severity ? 'border-accent bg-accent-wash/40 text-ink' : 'border-line text-ink-2 hover:text-ink'}`}>
+                  className={`rounded-full border px-3 py-1 text-xs transition ${kind === p.kind && severity === p.severity ? 'border-ink bg-surface-2 text-ink' : 'border-line text-ink-2 hover:text-ink'}`}>
                   {p.label}
                 </button>
               ))}
@@ -139,7 +139,7 @@ export default function StressLab({ current }: { current: Analysis | null }) {
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {KINDS.map((k) => (
                     <button key={k.id} onClick={() => setKind(k.id)}
-                      className={`rounded-xl border px-3 py-2.5 text-left transition ${kind === k.id ? 'border-accent bg-accent-wash/30 ring-1 ring-accent' : 'border-line hover:bg-surface-2'}`}>
+                      className={`rounded-xl border px-3 py-2.5 text-left transition ${kind === k.id ? 'border-ink bg-surface-2 ring-1 ring-ink' : 'border-line hover:bg-surface-2'}`}>
                       <div className="text-[13px] font-medium text-ink">{k.label}</div>
                       <div className="text-[11px] text-muted">{k.challenge}</div>
                     </button>

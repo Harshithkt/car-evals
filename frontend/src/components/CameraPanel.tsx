@@ -89,7 +89,7 @@ export function CameraPanel({ busy, result, onCapture }: {
 
   return (
     <Card
-      title={<span className="inline-flex items-center gap-2"><IconCamera className="h-4 w-4 text-accent" /> Live camera</span>}
+      title={<span className="inline-flex items-center gap-2"><IconCamera className="h-4 w-4 text-ink" /> Live camera</span>}
       subtitle="Point a webcam at a car, or at a photo of one on another screen."
       actions={stream && (
         <span className="inline-flex items-center gap-1.5 rounded-full bg-critical/10 px-2.5 py-1 text-xs font-medium text-critical-ink">

@@ -1,74 +1,42 @@
 @import "tailwindcss";
+@import "@fontsource-variable/inter";
 
-/* Design tokens. Chart series + status colours follow a validated, colour-blind-safe palette;
-   dark mode uses its own steps (not an automatic inversion). */
+/* ------------------------------------------------------------------------------------------------
+   White concrete, single ember. Paper canvas, Fog bands, black ink, Graphite body copy, Mist hairlines.
+   Ember (#ff5900) marks the primary action and the active tab only. Carbon / Abyss are the dark bookends
+   (announcement bar, footer). 12px radius on buttons, inputs and cards; 6px on tags. No gradients, no
+   card shadows. Chart series + status colours keep the validated colour-blind-safe palette.
+   ------------------------------------------------------------------------------------------------ */
 :root {
   color-scheme: light;
-  --page: #f9f9f7;
-  --surface: #fcfcfb;
-  --surface-2: #f3f2ee;
-  --ink: #0b0b0b;
-  --ink-2: #52514e;
-  --muted: #898781;
-  --grid: #e1e0d9;
-  --axis: #c3c2b7;
-  --border: rgba(11, 11, 11, 0.1);
-  --accent: #2a78d6;
-  --accent-wash: #cde2fb;
+  --page: #ffffff;        /* Paper */
+  --surface: #ffffff;     /* Card surface */
+  --surface-2: #f3f3f7;   /* Fog */
+  --ink: #000000;
+  --ink-2: #60646c;       /* Graphite: body paragraphs */
+  --muted: #6f737b;       /* Pewter: captions, helper text */
+  --steel: #8b8d98;
+  --grid: #e7e8ed;
+  --axis: #b9bbc6;
+  --border: #e1e2e8;      /* hairline on white */
+  --mist: #b9bbc6;        /* defined borders: inputs, outlined buttons */
+  --accent: #ff5900;      /* Ember */
+  --accent-wash: #f3f3f7;
+  --carbon: #15191e;
+  --abyss: #000710;
+  --bar: #15191e;         /* single-series bars */
   --series-1: #2a78d6;
   --series-2: #eb6834;
   --series-3: #1baf7a;
   --series-4: #eda100;
   --good: #0ca30c;
-  --good-ink: #006300;
+  --good-ink: #1a7f1a;
   --warning: #fab219;
   --warning-ink: #8a5a00;
   --critical: #d03b3b;
   --critical-ink: #b02a2a;
-}
-@media (prefers-color-scheme: dark) {
-  :root:where(:not([data-theme="light"])) {
-    color-scheme: dark;
-    --page: #0d0d0d;
-    --surface: #1a1a19;
-    --surface-2: #232321;
-    --ink: #f0efec;
-    --ink-2: #c3c2b7;
-    --muted: #898781;
-    --grid: #2c2c2a;
-    --axis: #383835;
-    --border: rgba(255, 255, 255, 0.1);
-    --accent: #3987e5;
-    --accent-wash: #184f95;
-    --series-1: #3987e5;
-    --series-2: #d95926;
-    --series-3: #199e70;
-    --series-4: #c98500;
-    --good-ink: #0ca30c;
-    --warning-ink: #fab219;
-    --critical-ink: #e66767;
-  }
-}
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --page: #0d0d0d;
-  --surface: #1a1a19;
-  --surface-2: #232321;
-  --ink: #f0efec;
-  --ink-2: #c3c2b7;
-  --muted: #898781;
-  --grid: #2c2c2a;
-  --axis: #383835;
-  --border: rgba(255, 255, 255, 0.1);
-  --accent: #3987e5;
-  --accent-wash: #184f95;
-  --series-1: #3987e5;
-  --series-2: #d95926;
-  --series-3: #199e70;
-  --series-4: #c98500;
-  --good-ink: #0ca30c;
-  --warning-ink: #fab219;
-  --critical-ink: #e66767;
+  --shadow-card: 0 0 0 0 transparent;
+  --shadow-pop: 0 12px 32px -12px rgba(0, 7, 16, 0.22); /* floating UI only */
 }
 
 @theme inline {
@@ -78,32 +46,26 @@
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-muted: var(--muted);
+  --color-steel: var(--steel);
   --color-line: var(--border);
+  --color-mist: var(--mist);
   --color-grid: var(--grid);
   --color-accent: var(--accent);
   --color-accent-wash: var(--accent-wash);
+  --color-carbon: var(--carbon);
+  --color-abyss: var(--abyss);
   --color-good: var(--good);
   --color-good-ink: var(--good-ink);
   --color-warning: var(--warning);
   --color-warning-ink: var(--warning-ink);
   --color-critical: var(--critical);
   --color-critical-ink: var(--critical-ink);
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-}
-
-:root {
-  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.05);
-  --shadow-pop: 0 12px 32px -8px rgba(16, 24, 40, 0.18), 0 4px 8px -4px rgba(16, 24, 40, 0.08);
-}
-@media (prefers-color-scheme: dark) {
-  :root:where(:not([data-theme="light"])) {
-    --shadow-card: 0 0 0 0 transparent;
-    --shadow-pop: 0 16px 40px -8px rgba(0, 0, 0, 0.6);
-  }
-}
-:root[data-theme="dark"] {
-  --shadow-card: 0 0 0 0 transparent;
-  --shadow-pop: 0 16px 40px -8px rgba(0, 0, 0, 0.6);
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --radius-md: 6px;   /* tags */
+  --radius-lg: 12px;  /* buttons, inputs */
+  --radius-xl: 12px;
+  --radius-2xl: 12px; /* cards */
+  --radius-3xl: 12px;
 }
 
 html {
@@ -113,24 +75,35 @@ body {
   background: var(--page);
   color: var(--ink);
   font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  /* neutral, engineered Inter: no contextual alternates or ligatures */
+  font-feature-settings: "calt" 0, "liga" 0, "ss03", "cv01", "cv10";
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
+h1, h2, h3 {
+  font-weight: 600;
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 ::selection {
-  background: var(--accent-wash);
+  background: #ffe2d1;
 }
 
-/* Landing hero: always dark, independent of the colour scheme */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* hero product frame: flat Fog surface (was a gradient glow) */
 .hero-bg {
-  background-color: #0a0f1a;
-  background-image:
-    radial-gradient(60rem 30rem at 85% -10%, rgba(57, 135, 229, 0.28), transparent 60%),
-    radial-gradient(40rem 24rem at -10% 110%, rgba(27, 175, 122, 0.12), transparent 60%),
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: auto, auto, 48px 48px, 48px 48px;
+  background: var(--surface-2);
 }
 
+/* detection scan line on the hero image (single ambient motion) */
 @keyframes scanline {
   0% { top: 0%; opacity: 0; }
   10% { opacity: 1; }
@@ -142,17 +115,12 @@ body {
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(57, 135, 229, 0.9), transparent);
-  box-shadow: 0 0 12px rgba(57, 135, 229, 0.8);
-  animation: scanline 2.2s ease-in-out infinite;
+  background: rgba(255, 255, 255, 0.85);
+  animation: scanline 2.4s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
   .scanline { animation: none; display: none; }
   html { scroll-behavior: auto; }
-}
-
-.tabular {
-  font-variant-numeric: tabular-nums;
 }
 
 /* Recharts: recessive chrome */

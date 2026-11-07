@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ComponentType, SVGProps } from 'react'
 import { api } from './lib/api'
+import { LogoMark } from './components/Logo'
 import type { Analysis, ClassMeta, Health, Metrics } from './lib/api'
 import {
-  CarMark, IconActivity, IconBook, IconChart, IconFlask, IconGrid, IconLayers, IconScan, IconSearch, IconXCircle,
+  IconActivity, IconBook, IconChart, IconFlask, IconGrid, IconLayers, IconScan, IconSearch, IconXCircle,
 } from './components/icons'
 import Landing, { Footer } from './pages/Landing'
 import Recognize from './pages/Recognize'
@@ -115,7 +116,7 @@ export default function App() {
       <header className="sticky top-0 z-40 border-b border-line bg-surface/85 backdrop-blur-md print:hidden">
         <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 sm:px-6">
           <button onClick={home} className="flex items-center gap-2.5 rounded-lg pr-2" title="Back to the home page">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-white"><CarMark className="h-5 w-5" /></span>
+            <LogoMark className="h-8 w-8" />
             <span className="hidden text-left leading-tight sm:block">
               <span className="block text-sm font-semibold tracking-[-0.01em] text-ink">Vehicle Recognition</span>
               <span className="block text-[11px] text-muted">P5 · Stanford Cars · 196 classes</span>
@@ -125,7 +126,7 @@ export default function App() {
             <HealthPill health={health} err={healthErr} onRetry={loadHealth} />
           </div>
         </div>
-        <nav className="mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-3 pb-2 sm:px-5" aria-label="Sections">
+        <nav className="mx-auto flex max-w-7xl items-end gap-1 overflow-x-auto px-3 sm:px-5" aria-label="Sections">
           {TABS.map((t, i) => {
             const active = tab === t.id
             const newGroup = i > 0 && TABS[i - 1].group !== t.group
@@ -136,13 +137,14 @@ export default function App() {
                   onClick={() => go(t.id)}
                   aria-current={active ? 'page' : undefined}
                   title={t.group}
-                  className={`inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors ${
-                    active ? 'bg-accent-wash/50 font-medium text-ink' : 'text-ink-2 hover:bg-surface-2 hover:text-ink'
+                  className={`relative inline-flex items-center gap-2 px-3 pb-2.5 pt-1.5 text-[14px] font-medium transition-colors ${
+                    active ? 'text-ink' : 'text-ink-2 hover:text-ink'
                   }`}
                 >
-                  <t.icon className={`h-4 w-4 ${active ? 'text-accent' : 'text-muted'}`} />
+                  <t.icon className={`h-4 w-4 ${active ? 'text-ink' : 'text-muted'}`} />
                   {t.label}
-                  {t.id === 'batch' && batch.some((b) => b.state === 'running') && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />}
+                  {t.id === 'batch' && batch.some((b) => b.state === 'running') && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-ink" />}
+                  {active && <span className="absolute inset-x-3 bottom-0 h-[2px] rounded-full bg-accent" aria-hidden />}
                 </button>
               </span>
             )

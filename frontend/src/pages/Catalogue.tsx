@@ -45,9 +45,9 @@ export default function Catalogue({ classes }: { classes: ClassMeta[] }) {
             className="w-full rounded-xl border border-line bg-page py-3 pl-10 pr-4 text-[15px] text-ink placeholder:text-muted focus:outline-2 focus:outline-accent" />
         </div>
         <div className="mt-3 flex flex-wrap gap-2">
-          <button onClick={() => setBody(null)} className={`rounded-full border px-3 py-1 text-xs ${!body ? 'border-accent bg-accent-wash/40 text-ink' : 'border-line text-ink-2 hover:text-ink'}`}>All styles</button>
+          <button onClick={() => setBody(null)} className={`rounded-full border px-3 py-1 text-xs ${!body ? 'border-ink bg-surface-2 text-ink' : 'border-line text-ink-2 hover:text-ink'}`}>All styles</button>
           {bodies.map(([b, n]) => (
-            <button key={b} onClick={() => setBody(body === b ? null : b)} className={`rounded-full border px-3 py-1 text-xs ${body === b ? 'border-accent bg-accent-wash/40 text-ink' : 'border-line text-ink-2 hover:text-ink'}`}>
+            <button key={b} onClick={() => setBody(body === b ? null : b)} className={`rounded-full border px-3 py-1 text-xs ${body === b ? 'border-ink bg-surface-2 text-ink' : 'border-line text-ink-2 hover:text-ink'}`}>
               {b} <span className="tabular text-muted">{n}</span>
             </button>
           ))}

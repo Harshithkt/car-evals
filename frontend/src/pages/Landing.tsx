@@ -3,10 +3,11 @@ import type { ReactNode } from 'react'
 import type { Health, Metrics, Row } from '../lib/api'
 import { ms, num, pct } from '../lib/format'
 import {
-  CarMark, IconArrowRight, IconCamera, IconChart, IconCheck, IconCpu, IconEye, IconFlask, IconGrid, IconHelp, IconLayers, IconMerge, IconScan,
+  IconArrowRight, IconCamera, IconPlay, IconChart, IconCheck, IconCpu, IconEye, IconFlask, IconGrid, IconHelp, IconLayers, IconMerge, IconScan,
   IconSearch, IconShield, IconSliders,
 } from '../components/icons'
 import { StatusBadge } from '../components/ui'
+import { LogoMark } from '../components/Logo'
 
 type Go = (tab: string) => void
 
@@ -43,53 +44,56 @@ export default function Landing({ metrics, health, go }: { metrics: Metrics | nu
 
   return (
     <div className="bg-page">
-      {/* ================= HERO ================= */}
-      <section className="hero-bg relative overflow-hidden text-white">
-        <nav className="relative z-10 mx-auto flex max-w-6xl items-center gap-6 px-4 py-5 sm:px-6">
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/15">
-              <CarMark className="h-5 w-5 text-[#6da7ec]" />
-            </span>
-            <span className="text-[15px] font-semibold tracking-[-0.01em]"><span className="hidden sm:inline">Fine-Grained </span>Vehicle Recognition</span>
-            <span className="hidden rounded-md bg-white/10 px-1.5 py-0.5 text-[11px] font-medium text-white/70 sm:inline">P5</span>
-          </div>
-          <div className="ml-auto hidden items-center gap-6 text-sm text-white/70 md:flex">
-            <button onClick={() => how.current?.scrollIntoView()} className="hover:text-white">How it works</button>
-            <button onClick={() => tools.current?.scrollIntoView()} className="hover:text-white">Tools</button>
-            <button onClick={() => results.current?.scrollIntoView()} className="hover:text-white">Results</button>
-            <button onClick={() => go('comparison')} className="hover:text-white">Evaluation</button>
-          </div>
-          <button onClick={() => go('recognize')} className="ml-auto whitespace-nowrap rounded-lg bg-white px-3.5 py-2 text-sm font-medium text-[#0a0f1a] hover:bg-white/90 md:ml-0">
-            Open app
-          </button>
-        </nav>
+      {/* ================= ANNOUNCEMENT BAR (dark bookend) ================= */}
+      <div className="bg-carbon px-4 py-2 text-center text-[12px] font-medium text-white">
+        Live demo: upload a photo, use your camera, or stress-test the model.{' '}
+        <button onClick={() => go('recognize')} className="font-semibold text-accent hover:underline">Try it now</button>
+      </div>
 
-        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-12 px-4 pb-20 pt-10 sm:px-6 md:pb-32 lg:grid-cols-[1.05fr_1fr] lg:pb-36 lg:pt-16">
+      {/* ================= NAV ================= */}
+      <nav className="border-b border-line bg-white">
+        <div className="mx-auto flex max-w-[1200px] items-center gap-8 px-4 py-4 sm:px-6">
+          <div className="flex items-center gap-2.5">
+            <LogoMark className="h-8 w-8" />
+            <span className="text-[17px] font-semibold tracking-[-0.02em]"><span className="hidden sm:inline">Fine-Grained </span>Vehicle Recognition</span>
+          </div>
+          <div className="hidden items-center gap-6 text-[14px] font-medium text-ink md:flex">
+            <button onClick={() => how.current?.scrollIntoView()} className="hover:text-ink-2">How it works</button>
+            <button onClick={() => tools.current?.scrollIntoView()} className="hover:text-ink-2">Tools</button>
+            <button onClick={() => results.current?.scrollIntoView()} className="hover:text-ink-2">Results</button>
+          </div>
+          <div className="ml-auto flex items-center gap-5">
+            <button onClick={() => go('comparison')} className="hidden text-[14px] font-medium text-ink hover:text-ink-2 sm:inline">See the evaluation</button>
+            <button onClick={() => go('recognize')} className="whitespace-nowrap rounded-lg bg-accent px-4 py-2 text-[14px] font-semibold text-white hover:brightness-95">Open the app</button>
+          </div>
+        </div>
+      </nav>
+
+      {/* ================= HERO ================= */}
+      <section className="bg-white">
+        <div className="mx-auto grid max-w-[1200px] items-center gap-12 px-4 pb-16 pt-14 sm:px-6 md:pb-24 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:pt-20">
           <div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/80">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#1baf7a]" />
-              Stanford Cars · 196 classes · classical CV + deep learning
-            </div>
-            <h1 className="text-[34px] font-semibold leading-[1.1] tracking-[-0.03em] sm:text-5xl lg:text-[54px]">
+            <p className="mb-5 inline-flex items-center gap-2 rounded-md bg-surface-2 px-2.5 py-1 text-[12px] font-medium text-ink-2">
+              Stanford Cars, 196 classes, classical CV + deep learning
+            </p>
+            <h1 className="text-[44px] font-semibold leading-[1.02] tracking-[-0.03em] sm:text-[56px] lg:text-[60px] lg:leading-none xl:text-[64px]">
               Identify the make, model and year of a car from one photo.
             </h1>
-            <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-white/70">
-              A hybrid recognition system. Classical image processing, a fine-tuned YOLOv8 detector and a ConvNeXt classifier work together,
-              and every prediction comes with a calibrated confidence and a visual explanation.
+            <p className="mt-6 max-w-[36rem] text-[20px] leading-[1.4] text-ink-2">
+              Classical image processing, a fine-tuned YOLOv8 detector and a ConvNeXt classifier work together. Every prediction comes with a calibrated confidence and a visual explanation.
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <button onClick={() => go('recognize')} className="group inline-flex items-center gap-2 rounded-lg bg-[#2a78d6] px-5 py-3 text-[15px] font-medium text-white shadow-lg shadow-[#2a78d6]/25 hover:bg-[#256abf]">
+            <div className="mt-8 flex flex-wrap items-center gap-6">
+              <button onClick={() => go('recognize')} className="rounded-lg bg-accent px-5 py-3 text-[16px] font-semibold text-white hover:brightness-95">
                 Try it with a photo
-                <IconArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </button>
-              <button onClick={() => go('comparison')} className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-5 py-3 text-[15px] font-medium text-white/90 hover:bg-white/5">
-                See the evaluation
+              <button onClick={() => go('stress')} className="inline-flex items-center gap-2 text-[14px] font-medium text-ink hover:text-ink-2">
+                <IconPlay className="h-4 w-4 text-accent" /> Watch it handle night and fog
               </button>
             </div>
-            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-[13px] text-white/55">
-              <span className="inline-flex items-center gap-1.5"><IconCheck className="h-4 w-4 text-[#1baf7a]" /> Multiple vehicles per image</span>
-              <span className="inline-flex items-center gap-1.5"><IconCheck className="h-4 w-4 text-[#1baf7a]" /> Grad-CAM explanations</span>
-              <span className="inline-flex items-center gap-1.5"><IconCheck className="h-4 w-4 text-[#1baf7a]" /> Runs on CPU or GPU</span>
+            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-[14px] text-muted">
+              <span className="inline-flex items-center gap-1.5"><IconCheck className="h-4 w-4 text-ink" /> Multiple vehicles per image</span>
+              <span className="inline-flex items-center gap-1.5"><IconCheck className="h-4 w-4 text-ink" /> Grad-CAM explanations</span>
+              <span className="inline-flex items-center gap-1.5"><IconCheck className="h-4 w-4 text-ink" /> Runs on CPU or GPU</span>
             </div>
           </div>
 
@@ -98,9 +102,9 @@ export default function Landing({ metrics, health, go }: { metrics: Metrics | nu
       </section>
 
       {/* ================= STATS ================= */}
-      <section className="relative z-10 mx-auto -mt-10 max-w-6xl px-4 sm:px-6">
-        <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-pop)] md:grid-cols-4">
-          <Stat value={pct(hybrid?.top1)} label="Top-1 accuracy" note="exact make + model + year" />
+      <section className="mx-auto max-w-[1200px] px-4 sm:px-6">
+        <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-line bg-white md:grid-cols-4">
+          <Stat value={pct(hybrid?.top1)} label="Top-1 accuracy" note="exact make, model and year" />
           <Stat value={pct(hybrid?.make_acc)} label="Make accuracy" note="hybrid system, test set" />
           <Stat value={num(det?.yolov8s_finetuned?.mAP50, 3)} label="Detection mAP@0.5" note="fine-tuned YOLOv8s" />
           <Stat value="196" label="Vehicle classes" note="8,041 unseen test images" />
@@ -123,7 +127,7 @@ export default function Landing({ metrics, health, go }: { metrics: Metrics | nu
               <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">Result</div>
               <div className="mt-1 text-[15px] font-semibold leading-snug text-ink">{HERO.make} {HERO.model}</div>
               <div className="text-sm text-ink-2">{HERO.year}</div>
-              <div className="mt-3 h-1.5 rounded-full bg-accent-wash/60"><div className="h-1.5 rounded-full bg-good" style={{ width: `${HERO.confidence * 100}%` }} /></div>
+              <div className="mt-3 h-1.5 rounded-full bg-accent-wash/60"><div className="h-1.5 rounded-full bg-ink" style={{ width: `${HERO.confidence * 100}%` }} /></div>
               <div className="mt-1.5 text-xs text-ink-2 tabular">{pct(HERO.confidence)} calibrated</div>
             </div>
             <div className="mt-3 text-sm font-medium text-ink">Fusion and decision</div>
@@ -197,7 +201,7 @@ export default function Landing({ metrics, health, go }: { metrics: Metrics | nu
           <div className="mt-5 rounded-2xl border border-line bg-surface p-6 shadow-[var(--shadow-card)]">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <div className="text-[15px] font-semibold text-ink">Vehicle localisation (mAP@0.5:0.95)</div>
-              <button onClick={() => go('comparison')} className="inline-flex items-center gap-1 text-sm text-accent hover:underline">
+              <button onClick={() => go('comparison')} className="inline-flex items-center gap-1 text-sm text-ink hover:underline">
                 Full comparison <IconArrowRight className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -208,7 +212,7 @@ export default function Landing({ metrics, health, go }: { metrics: Metrics | nu
                   <div key={k} className="grid grid-cols-[minmax(0,11rem)_1fr_3.5rem] items-center gap-3 text-sm sm:grid-cols-[14rem_1fr_4rem]">
                     <span className={k === 'yolov8s_finetuned' ? 'font-medium text-ink' : 'text-ink-2'}>{label}</span>
                     <span className="h-2 rounded-full bg-surface-2">
-                      <span className="block h-2 rounded-full" style={{ width: `${(typeof v === 'number' ? v : 0) * 100}%`, background: 'var(--series-1)', opacity: k === 'yolov8s_finetuned' ? 1 : 0.5 }} />
+                      <span className="block h-2 rounded-full" style={{ width: `${(typeof v === 'number' ? v : 0) * 100}%`, background: 'var(--bar)', opacity: k === 'yolov8s_finetuned' ? 1 : 0.5 }} />
                     </span>
                     <span className="text-right font-medium tabular text-ink">{num(v, 3)}</span>
                   </div>
@@ -250,18 +254,18 @@ export default function Landing({ metrics, health, go }: { metrics: Metrics | nu
       </section>
 
       {/* ================= CTA ================= */}
-      <section className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
-        <div className="hero-bg relative overflow-hidden rounded-3xl px-6 py-14 text-center text-white sm:px-12">
-          <h2 className="text-3xl font-semibold tracking-[-0.02em] sm:text-4xl">Try it on your own photo</h2>
-          <p className="mx-auto mt-3 max-w-xl text-white/70">
+      <section className="bg-surface-2">
+        <div className="mx-auto max-w-[1200px] px-4 py-20 text-center sm:px-6">
+          <h2 className="text-[36px] font-semibold leading-[1.21] tracking-[-0.02em]">Try it on your own photo</h2>
+          <p className="mx-auto mt-3 max-w-xl text-[16px] text-ink-2">
             Upload a JPG, PNG or WEBP image, or start from one of the sample test images.
-            {health?.device && <> The model is loaded and running on <b className="text-white">{health.device.toUpperCase()}</b>.</>}
+            {health?.device && <> The model is loaded and running on <b className="font-semibold text-ink">{health.device.toUpperCase()}</b>.</>}
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <button onClick={() => go('recognize')} className="group inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-[15px] font-medium text-[#0a0f1a] hover:bg-white/90">
-              Open the recogniser <IconArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            <button onClick={() => go('recognize')} className="rounded-lg bg-accent px-5 py-3 text-[16px] font-semibold text-white hover:brightness-95">
+              Open the recogniser
             </button>
-            <button onClick={() => go('pipeline')} className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-5 py-3 text-[15px] font-medium text-white/90 hover:bg-white/5">
+            <button onClick={() => go('pipeline')} className="rounded-lg border border-mist bg-white px-5 py-3 text-[16px] font-medium text-ink hover:bg-surface-2">
               Explore the pipeline
             </button>
           </div>
@@ -278,13 +282,13 @@ function HeroShot() {
   const b = HERO.box
   return (
     <div className="relative mx-auto w-full max-w-xl lg:max-w-none">
-      <div className="rounded-2xl bg-white/5 p-2 ring-1 ring-white/10 backdrop-blur">
+      <div className="rounded-2xl bg-surface-2 p-2">
         <div className="relative overflow-hidden rounded-xl">
           <img src="/landing/hero.jpg" alt="Pickup truck recognised by the system" className="block w-full" />
-          <div className="absolute rounded-[3px] border-2 border-[#22c55e] shadow-[0_0_0_1px_rgba(0,0,0,0.25)]" style={{ left: `${b.left}%`, top: `${b.top}%`, width: `${b.width}%`, height: `${b.height}%` }}>
+          <div className="absolute rounded-md border-2 border-white" style={{ left: `${b.left}%`, top: `${b.top}%`, width: `${b.width}%`, height: `${b.height}%` }}>
             <span className="scanline" />
-            <span className="absolute -top-[26px] -left-[2px] whitespace-nowrap rounded-t-[3px] bg-[#22c55e] px-2 py-1 text-[11px] font-semibold text-[#06210f] sm:text-xs">
-              {HERO.make} Silverado 1500 · {pct(HERO.confidence)}
+            <span className="absolute left-2 top-2 whitespace-nowrap rounded-md bg-white px-2 py-1 text-[12px] font-semibold text-ink">
+              {HERO.make} Silverado 1500, {pct(HERO.confidence)}
             </span>
           </div>
         </div>
@@ -293,21 +297,21 @@ function HeroShot() {
       {/* floating result card: overlaps only the image's bottom edge */}
       <div className="relative mt-4 rounded-xl border border-line bg-surface p-4 text-ink shadow-[var(--shadow-pop)] md:absolute md:-bottom-20 md:-left-8 md:mt-0 md:w-[17.5rem]">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">Prediction</span>
+          <span className="text-[12px] font-medium text-muted">Prediction</span>
           <StatusBadge status="confident" />
         </div>
         <div className="mt-2.5 text-[15px] font-semibold leading-snug">{HERO.make} {HERO.model}</div>
-        <div className="text-sm text-ink-2">{HERO.year} · detector {pct(HERO.det, 0)}</div>
+        <div className="text-sm text-ink-2">{HERO.year}, detector {pct(HERO.det, 0)}</div>
         <div className="mt-3 flex items-center gap-2.5">
-          <div className="h-1.5 flex-1 rounded-full bg-surface-2"><div className="h-1.5 rounded-full bg-good" style={{ width: `${HERO.confidence * 100}%` }} /></div>
+          <div className="h-1.5 flex-1 rounded-full bg-surface-2"><div className="h-1.5 rounded-full bg-ink" style={{ width: `${HERO.confidence * 100}%` }} /></div>
           <span className="text-xs font-semibold tabular">{pct(HERO.confidence)}</span>
         </div>
       </div>
 
       {/* floating grad-cam chip */}
-      <div className="absolute -right-3 -top-6 hidden w-40 overflow-hidden rounded-xl border border-white/15 bg-[#0a0f1a] shadow-[var(--shadow-pop)] md:block">
+      <div className="absolute -right-3 -top-6 hidden w-40 overflow-hidden rounded-xl border border-line bg-white shadow-[var(--shadow-pop)] md:block">
         <img src="/landing/gradcam.jpg" alt="Grad-CAM heat-map" className="aspect-[16/10] w-full object-cover" />
-        <div className="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] text-white/80"><IconEye className="h-3.5 w-3.5" /> Grad-CAM</div>
+        <div className="flex items-center gap-1.5 px-2.5 py-1.5 text-[12px] font-medium text-ink"><IconEye className="h-3.5 w-3.5" /> Grad-CAM</div>
       </div>
     </div>
   )
@@ -317,7 +321,7 @@ function HeroShot() {
 function Stat({ value, label, note }: { value: string; label: string; note: string }) {
   return (
     <div className="border-line px-5 py-6 [&:not(:last-child)]:border-r max-md:[&:nth-child(2)]:border-r-0 max-md:[&:nth-child(-n+2)]:border-b sm:px-7">
-      <div className="text-[30px] font-semibold leading-none tracking-[-0.03em] text-ink sm:text-[34px]">{value}</div>
+      <div className="text-[36px] font-semibold leading-none tracking-[-0.02em] text-ink sm:text-[48px] sm:tracking-[-0.025em]">{value}</div>
       <div className="mt-2 text-sm font-medium text-ink">{label}</div>
       <div className="text-xs text-muted">{note}</div>
     </div>
@@ -327,15 +331,15 @@ function Stat({ value, label, note }: { value: string; label: string; note: stri
 function SectionHead({ eyebrow, title, children, align = 'center' }: { eyebrow: string; title: string; children?: ReactNode; align?: 'center' | 'left' }) {
   return (
     <div className={align === 'center' ? 'mx-auto max-w-2xl text-center' : ''}>
-      <div className="text-xs font-semibold uppercase tracking-[0.1em] text-accent">{eyebrow}</div>
-      <h2 className="mt-2 text-[28px] font-semibold leading-tight tracking-[-0.02em] text-ink sm:text-[34px]">{title}</h2>
-      {children && <p className="mt-3 text-[15px] leading-relaxed text-ink-2">{children}</p>}
+      <div className="text-[14px] font-medium text-muted">{eyebrow}</div>
+      <h2 className="mt-2 text-[36px] font-semibold leading-[1.21] tracking-[-0.02em] text-ink sm:text-[48px] sm:leading-[1.2] sm:tracking-[-0.025em]">{title}</h2>
+      {children && <p className="mt-4 text-[16px] leading-[1.5] text-ink-2">{children}</p>}
     </div>
   )
 }
 
 const StepNo = ({ n }: { n: number }) => (
-  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent text-xs font-semibold text-white tabular">{n}</span>
+  <span className="flex h-6 w-6 items-center justify-center rounded-md bg-ink text-xs font-semibold text-white tabular">{n}</span>
 )
 
 function Frame({ n, src, title, text }: { n: number; src: string; title: string; text: string }) {
@@ -354,7 +358,7 @@ function Frame({ n, src, title, text }: { n: number; src: string; title: string;
 function Pillar({ icon, title, items }: { icon: ReactNode; title: string; items: string[] }) {
   return (
     <div className="rounded-2xl border border-line bg-page p-6">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-wash/50 text-accent">{icon}</div>
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-2 text-ink">{icon}</div>
       <h3 className="mt-4 text-lg font-semibold tracking-[-0.01em] text-ink">{title}</h3>
       <ul className="mt-4 space-y-2.5">
         {items.map((t) => (
@@ -370,11 +374,11 @@ function Pillar({ icon, title, items }: { icon: ReactNode; title: string; items:
 
 function Tool({ icon, title, text, tab, go }: { icon: ReactNode; title: string; text: string; tab: string; go: Go }) {
   return (
-    <button onClick={() => go(tab)} className="group flex flex-col rounded-2xl border border-line bg-surface p-6 text-left shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-[var(--shadow-pop)]">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-wash/50 text-accent transition group-hover:bg-accent group-hover:text-white">{icon}</div>
+    <button onClick={() => go(tab)} className="group flex flex-col rounded-2xl border border-line bg-surface p-6 text-left shadow-[var(--shadow-card)] transition hover:border-mist">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-2 text-ink transition group-hover:bg-ink group-hover:text-white">{icon}</div>
       <h3 className="mt-4 text-[15px] font-semibold text-ink">{title}</h3>
       <p className="mt-1.5 flex-1 text-[13px] leading-relaxed text-ink-2">{text}</p>
-      <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-accent">Open <IconArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
+      <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-ink">Open <IconArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
     </button>
   )
 }
@@ -382,16 +386,16 @@ function Tool({ icon, title, text, tab, go }: { icon: ReactNode; title: string; 
 function Approach({ name, detail, r, featured }: { name: string; detail: string; r?: Row; featured?: boolean }) {
   const t1 = typeof r?.top1 === 'number' ? r.top1 : null
   return (
-    <div className={`rounded-2xl border bg-surface p-6 shadow-[var(--shadow-card)] ${featured ? 'border-accent ring-1 ring-accent' : 'border-line'}`}>
+    <div className={`rounded-2xl border bg-surface p-6 shadow-[var(--shadow-card)] ${featured ? 'border-ink ring-1 ring-ink' : 'border-line'}`}>
       <div className="flex items-center justify-between">
         <div className="text-[15px] font-semibold text-ink">{name}</div>
-        {featured && <span className="rounded-full bg-accent px-2 py-0.5 text-[11px] font-medium text-white">Deployed</span>}
+        {featured && <span className="rounded-md bg-ink px-2 py-0.5 text-[12px] font-medium text-white">Deployed</span>}
       </div>
       <p className="mt-1 min-h-10 text-[13px] text-ink-2">{detail}</p>
       <div className="mt-5 text-[40px] font-semibold leading-none tracking-[-0.03em] text-ink">{pct(t1)}</div>
       <div className="mt-1 text-xs text-muted">top-1 accuracy</div>
       <div className="mt-3 h-1.5 rounded-full bg-surface-2">
-        <div className="h-1.5 rounded-full" style={{ width: `${(t1 ?? 0) * 100}%`, background: 'var(--series-1)', opacity: featured ? 1 : 0.55 }} />
+        <div className="h-1.5 rounded-full" style={{ width: `${(t1 ?? 0) * 100}%`, background: 'var(--bar)', opacity: featured ? 1 : 0.55 }} />
       </div>
       <dl className="mt-5 grid grid-cols-3 gap-2 border-t border-grid pt-4 text-xs">
         <div><dt className="text-muted">Top-5</dt><dd className="mt-0.5 font-medium tabular text-ink">{pct(r?.top5)}</dd></div>
@@ -416,33 +420,33 @@ function Decision({ status, rule, text }: { status: 'confident' | 'uncertain_mod
 
 export function Footer({ go, wide }: { go: Go; wide?: boolean }) {
   return (
-    <footer className="border-t border-line bg-surface">
+    <footer className="bg-abyss text-[#b9bbc6]">
       <div className={`mx-auto grid gap-8 px-4 py-10 text-sm sm:px-6 md:grid-cols-[1.4fr_1fr_1fr] ${wide ? 'max-w-7xl' : 'max-w-6xl'}`}>
         <div>
-          <div className="flex items-center gap-2 font-semibold text-ink"><CarMark className="h-5 w-5 text-accent" /> Fine-Grained Vehicle Recognition</div>
-          <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-ink-2">
+          <div className="flex items-center gap-2 font-semibold text-white"><LogoMark className="h-7 w-7" /> Fine-Grained Vehicle Recognition</div>
+          <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-[#b9bbc6]">
             P5: Intelligent Fine-Grained Vehicle Recognition and Analysis System. Trained on Stanford Cars (16,185 images, 196 classes). The dataset has no
             number plates or video, so licence-plate reading and tracking are out of scope.
           </p>
         </div>
         <div>
-          <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">Tools</div>
-          <ul className="space-y-1.5 text-ink-2">
+          <div className="mb-2 text-[14px] font-semibold text-white">Tools</div>
+          <ul className="space-y-1.5 text-[#b9bbc6]">
             {([['recognize', 'Recognize & live camera', IconScan], ['batch', 'Batch analysis', IconGrid], ['stress', 'Stress lab', IconFlask], ['pipeline', 'Pipeline', IconLayers], ['catalogue', 'Coverage catalogue', IconSearch]] as const).map(([id, l, I]) => (
-              <li key={id}><button onClick={() => go(id)} className="inline-flex items-center gap-2 hover:text-ink"><I className="h-4 w-4" />{l}</button></li>
+              <li key={id}><button onClick={() => go(id)} className="inline-flex items-center gap-2 hover:text-white"><I className="h-4 w-4" />{l}</button></li>
             ))}
           </ul>
         </div>
         <div>
-          <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">Evaluation</div>
-          <ul className="space-y-1.5 text-ink-2">
+          <div className="mb-2 text-[14px] font-semibold text-white">Evaluation</div>
+          <ul className="space-y-1.5 text-[#b9bbc6]">
             {([['comparison', 'Model comparison', IconChart], ['robustness', 'Robustness & confidence', IconShield], ['failures', 'Failure analysis', IconEye], ['about', 'About the system', IconCpu]] as const).map(([id, l, I]) => (
-              <li key={id}><button onClick={() => go(id)} className="inline-flex items-center gap-2 hover:text-ink"><I className="h-4 w-4" />{l}</button></li>
+              <li key={id}><button onClick={() => go(id)} className="inline-flex items-center gap-2 hover:text-white"><I className="h-4 w-4" />{l}</button></li>
             ))}
           </ul>
         </div>
       </div>
-      <div className="border-t border-line py-4 text-center text-xs text-muted">YOLOv8 · ConvNeXt-Tiny · OpenCV · scikit-image · FastAPI · React</div>
+      <div className="border-t border-white/10 py-5 text-center text-[12px] text-[#8b8d98]">YOLOv8 · ConvNeXt-Tiny · OpenCV · scikit-image · FastAPI · React</div>
     </footer>
   )
 }

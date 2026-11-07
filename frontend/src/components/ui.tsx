@@ -9,12 +9,12 @@ export function Card({ title, subtitle, children, actions, className = '' }: {
   className?: string
 }) {
   return (
-    <section className={`min-w-0 rounded-2xl border border-line bg-surface p-4 shadow-[var(--shadow-card)] sm:p-6 ${className}`}>
+    <section className={`min-w-0 rounded-2xl border border-line bg-surface p-6 sm:p-8 ${className}`}>
       {(title || actions) && (
         <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            {title && <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-ink">{title}</h2>}
-            {subtitle && <p className="mt-1 text-[13px] leading-relaxed text-ink-2">{subtitle}</p>}
+            {title && <h2 className="text-[20px] font-semibold leading-[1.4] tracking-[-0.01em] text-ink">{title}</h2>}
+            {subtitle && <p className="mt-1 text-[14px] leading-[1.43] text-ink-2">{subtitle}</p>}
           </div>
           {actions}
         </header>
@@ -33,18 +33,18 @@ export function PageHeader({ title, eyebrow, children, actions }: {
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div className="min-w-0">
-        {eyebrow && <div className="mb-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-accent">{eyebrow}</div>}
-        <h1 className="text-2xl font-semibold tracking-[-0.02em] text-ink sm:text-[28px]">{title}</h1>
-        {children && <p className="mt-2 max-w-3xl text-[15px] leading-relaxed text-ink-2">{children}</p>}
+        {eyebrow && <div className="mb-1.5 text-[14px] font-medium text-muted">{eyebrow}</div>}
+        <h1 className="text-[36px] font-semibold leading-[1.21] tracking-[-0.02em] text-ink sm:text-[48px] sm:leading-[1.2] sm:tracking-[-0.025em]">{title}</h1>
+        {children && <p className="mt-3 max-w-[40rem] text-[16px] leading-[1.5] text-ink-2">{children}</p>}
       </div>
       {actions}
     </div>
   )
 }
 
-/** Small uppercase section label used inside cards. */
+/** Small section label used inside cards. */
 export function Label({ children }: { children: ReactNode }) {
-  return <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">{children}</div>
+  return <div className="mb-2 text-[12px] font-medium text-muted">{children}</div>
 }
 
 /** Empty state for a metrics.json key or plot that the notebook run did not produce. */
@@ -95,7 +95,7 @@ export const STATUS_COLOR: Record<Status, string> = { confident: 'var(--good)', 
 export function StatusBadge({ status }: { status: Status }) {
   const s = STATUS[status] ?? STATUS.low_confidence
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${s.cls}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[12px] font-medium ${s.cls}`}>
       <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" aria-hidden>{s.icon}</svg>
       {s.label}
     </span>
@@ -122,7 +122,7 @@ export const DET_SOURCE: Record<DetSource, { label: string; note?: string }> = {
 export function Meter({ value, color = 'var(--series-1)' }: { value: number; color?: string }) {
   const w = Math.max(0, Math.min(1, value)) * 100
   return (
-    <div className="h-2 w-full rounded-full bg-accent-wash/60" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(w)}>
+    <div className="h-2 w-full rounded-full bg-surface-2" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(w)}>
       <div className="h-2 rounded-full" style={{ width: `${w}%`, background: color }} />
     </div>
   )
@@ -142,7 +142,7 @@ export function Toggle({ checked, onChange, label, disabled }: {
         aria-checked={checked}
         disabled={disabled}
         onClick={() => onChange(!checked)}
-        className={`relative h-5 w-9 rounded-full transition-colors ${checked ? 'bg-accent' : 'bg-grid'}`}
+        className={`relative h-5 w-9 rounded-full transition-colors ${checked ? 'bg-ink' : 'bg-mist'}`}
       >
         <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${checked ? 'left-[18px]' : 'left-0.5'}`} />
       </button>

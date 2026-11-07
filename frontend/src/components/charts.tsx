@@ -90,7 +90,7 @@ export function Lines({ data, xKey, series, fmt, height = 240, domain, xLabel }:
 }
 
 /** Single-series horizontal bars in HTML: long labels wrap instead of being clipped; value sits at the bar tip. */
-export function BarList({ items, fmt, max, highlight, color = 'var(--series-1)' }: {
+export function BarList({ items, fmt, max, highlight, color = 'var(--bar)' }: {
   items: { label: string; value: number | null | undefined; hint?: string }[]
   fmt: Fmt
   max?: number

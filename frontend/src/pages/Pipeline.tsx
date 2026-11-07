@@ -71,7 +71,7 @@ export default function Pipeline({ result, plots, onGoRecognize }: {
         <Card>
           <div className="py-10 text-center text-sm text-ink-2">
             No image analysed yet.{' '}
-            <button onClick={onGoRecognize} className="text-accent hover:underline">Upload one on the Recognize tab</button>, then come back here.
+            <button onClick={onGoRecognize} className="text-ink underline decoration-mist underline-offset-4 hover:decoration-ink">Upload one on the Recognize tab</button>, then come back here.
           </div>
         </Card>
       ) : stages.length === 0 ? (

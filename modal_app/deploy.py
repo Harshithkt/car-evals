@@ -2,15 +2,20 @@
 
     cd frontend && npm run build && cd ..            # the frontend is served from frontend/dist
     .venv/bin/modal deploy modal_app/deploy.py       # → https://<workspace>--p5-vehicle-app-web.modal.run
-    P5_WARM=1 .venv/bin/modal deploy modal_app/deploy.py   # demo day: keep one container warm (~$0.13/h)
+    P5_WARM=1 .venv/bin/modal deploy modal_app/deploy.py   # demo day: keep one container warm (~$0.14/h)
     .venv/bin/modal deploy modal_app/deploy.py       # afterwards: back to scale-to-zero
     .venv/bin/modal app stop p5-vehicle-app          # take it offline
 
 Cost controls
-  * CPU only: 2 physical cores (hard limit, so billing can't exceed 2 cores) + 4 GiB. About $0.13 per hour while a container runs.
+  * CPU only: 2 physical cores (hard limit, so billing can't exceed 2 cores) + 6 GiB. About $0.14 per hour while a container runs.
   * Scale to zero: after 5 idle minutes the container stops and billing stops. The next visitor waits for a cold start.
   * max_containers=1: a public link can never fan out into many billed containers.
-Both classifier engines are loaded: ONNX INT8 (fast; used by live camera / batch fast mode) and PyTorch FP32 (Grad-CAM).
+Two models are served (all cars 1948-2026 by default, and the Stanford Cars benchmark model). Each has two classifier
+engines: ONNX INT8 (fast; used by live camera / batch fast mode) and PyTorch FP32 (Grad-CAM). The default model loads
+before the first request is served; the other one loads in the background right after.
+
+Optional LLM second opinion: put NEBIUS_API_KEY=... in the git-ignored .env file (or export it) before `modal deploy`.
+It is passed to the container as a Modal secret; without it the button is simply hidden.
 """
 import os
 import pathlib
@@ -20,6 +25,21 @@ import modal
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CPUS = 2
 WARM = int(os.environ.get('P5_WARM', '0'))
+
+
+def _llm_secrets() -> list:
+    """Optional LLM second opinion: if NEBIUS_API_KEY is set (environment or the git-ignored .env file), pass it to the
+    container as a Modal secret. The key is never baked into the image or printed."""
+    env = {}
+    p = ROOT / '.env'
+    if p.is_file():
+        for line in p.read_text().splitlines():
+            if '=' in line and not line.lstrip().startswith('#'):
+                k, v = line.split('=', 1)
+                env[k.strip()] = v.strip().strip('"').strip("'")
+    vals = {k: os.environ.get(k) or env.get(k) for k in ('NEBIUS_API_KEY', 'NEBIUS_VLM_MODEL', 'LLM_MAX_PER_HOUR')}
+    vals = {k: v for k, v in vals.items() if v}
+    return [modal.Secret.from_dict(vals)] if vals.get('NEBIUS_API_KEY') else []
 
 image = (
     modal.Image.debian_slim(python_version='3.11')
@@ -40,6 +60,8 @@ image = (
     # only what inference needs: skip the FP32 ONNX / FP16 exports, backups and caches (~170 MB instead of ~330 MB)
     .add_local_dir(ROOT / 'artifacts', '/app/artifacts',
                    ignore=['classifier_fp32.onnx', 'classifier_fp16.pth', 'backup-*', '__pycache__', '*.colab.*', 'requirements.txt'])
+    # the all-cars model (default in the app); same file layout, no classical fusion file
+    .add_local_dir(ROOT / 'artifacts_modern', '/app/artifacts_modern', ignore=['__pycache__', '*.onnx.data'])
     .add_local_dir(ROOT / 'plots', '/app/plots')
     .add_local_dir(ROOT / 'samples', '/app/samples')
     .add_local_dir(ROOT / 'frontend' / 'dist', '/app/frontend/dist')
@@ -50,11 +72,12 @@ app = modal.App('p5-vehicle-app', image=image)
 
 @app.function(
     cpu=(float(CPUS), float(CPUS)),  # (request, hard limit)
-    memory=4096,
+    memory=6144,  # two models (about 1.6 GB resident) plus headroom for Grad-CAM and large uploads
     min_containers=WARM,
     max_containers=1,
     scaledown_window=300,
     timeout=120,
+    secrets=_llm_secrets(),
 )
 @modal.concurrent(max_inputs=8)  # static files and health checks don't queue behind a prediction
 @modal.asgi_app()

@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react'
-import type { ClassMeta, Status, Vehicle } from '../lib/api'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { api } from '../lib/api'
+import type { ClassMeta, LLMOpinion, Status, Vehicle } from '../lib/api'
 import { pct } from '../lib/format'
 import { bodyType, indexByName, runnerUpInsight } from '../lib/classes'
 import { BarList } from './charts'
-import { IconAlert, IconCheck, IconHelp, IconInfo, IconSliders } from './icons'
+import { IconAlert, IconCheck, IconHelp, IconInfo, IconSliders, IconSparkles } from './icons'
 import { Card, DET_SOURCE, Label, Meter, STATUS_COLOR, StatusBadge } from './ui'
 
 const STATUS_BOX: Record<Status, string> = {
@@ -37,8 +38,46 @@ export function CropThumb({ src, box, size, className = '' }: { src: string; box
   )
 }
 
-export function VehicleCard({ v, index, total, preview, imageSize, classes, thresholds }: {
+/** One LLM call per vehicle per analysis, shared by every render of that card (switching tabs does not ask again). */
+const LLM_CACHE = new Map<string, Promise<LLMOpinion>>()
+const known = (s?: string) => !!s && s.trim().toLowerCase() !== 'unknown'
+
+function useLLMOpinion(key: string, v: Vehicle, preview: string | null | undefined, imageSize: [number, number] | undefined, auto: boolean) {
+  const [res, setRes] = useState<LLMOpinion | null>(null)
+  const [err, setErr] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const ask = useCallback(async () => {
+    if (!preview || !imageSize) return
+    setBusy(true)
+    setErr(null)
+    try {
+      let p = LLM_CACHE.get(key)
+      if (!p) {
+        p = cropBlob(preview, v.box, imageSize).then((b) => api.llmOpinion(b))
+        LLM_CACHE.set(key, p)
+        p.catch(() => LLM_CACHE.delete(key))   // a failed call may be retried
+      }
+      setRes(await p)
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : String(e))
+    } finally {
+      setBusy(false)
+    }
+  }, [key, preview, imageSize, v.box])
+  useEffect(() => {
+    if (auto) void ask()
+  }, [auto, ask])
+  return { res, err, busy, ask }
+}
+
+export function VehicleCard({ v, index, total, preview, imageSize, classes, thresholds, llm = false, autoLLM = false, cacheKey }: {
   v: Vehicle
+  /** the server has a vision LLM configured (optional second opinion) */
+  llm?: boolean
+  /** ask the LLM automatically when the trained model's confidence is low (off for live camera frames) */
+  autoLLM?: boolean
+  /** identifies this vehicle in this analysis, so the LLM is asked only once */
+  cacheKey?: string
   index: number
   total: number
   preview?: string | null
@@ -53,6 +92,13 @@ export function VehicleCard({ v, index, total, preview, imageSize, classes, thre
   const insight = useMemo(() => runnerUpInsight(v.top5, byName), [v.top5, byName])
   const body = bodyType(v.model)
 
+  // Low confidence usually means the car is outside the trained classes: then the vision LLM's answer leads the card.
+  const autoAsk = llm && autoLLM && v.status === 'low_confidence' && !!preview && !!imageSize
+  const op = useLLMOpinion(cacheKey ?? `${v.box.join(',')}-${v.label}`, v, preview, imageSize, autoAsk)
+  const a = op.res?.answer
+  const llmLead = autoAsk && (op.busy || (!!a && known(a.make)))
+  const llmShort = op.res?.model.split('/').pop()
+
   return (
     <Card className="print:break-inside-avoid">
       <div className="flex flex-wrap items-start gap-4">
@@ -60,38 +106,80 @@ export function VehicleCard({ v, index, total, preview, imageSize, classes, thre
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex flex-wrap items-center gap-2">
             {total > 1 && <span className="rounded-md bg-surface-2 px-2 py-0.5 text-xs font-medium text-ink-2">Vehicle {index + 1}</span>}
-            <StatusBadge status={v.status} />
-            {body !== 'Other' && <span className="rounded-md border border-line px-2 py-0.5 text-xs text-ink-2">{body}</span>}
+            {llmLead
+              ? <span className="inline-flex items-center gap-1 rounded-md border border-ink/30 bg-surface-2 px-2 py-0.5 text-xs font-medium text-ink"><IconSparkles className="h-3.5 w-3.5" /> Vision LLM answer</span>
+              : <StatusBadge status={v.status} />}
+            {!llmLead && body !== 'Other' && <span className="rounded-md border border-line px-2 py-0.5 text-xs text-ink-2">{body}</span>}
           </div>
-          <h3 className="text-xl font-semibold leading-tight tracking-[-0.015em] text-ink sm:text-2xl">
-            {confident ? `${v.make} ${v.model}` : <>Likely a {v.make_guess}</>}
-          </h3>
-          <div className="mt-1 text-sm text-ink-2">{confident ? v.year : `Best guess: ${v.label}`}</div>
+          {llmLead ? (
+            <>
+              <h3 className={`text-xl font-semibold leading-tight tracking-[-0.015em] text-ink sm:text-2xl ${op.busy ? 'animate-pulse text-ink-2' : ''}`}>
+                {op.busy ? 'Asking a vision LLM…' : [a!.make, known(a!.model) ? a!.model : ''].filter(Boolean).join(' ')}
+              </h3>
+              <div className="mt-1 text-sm text-ink-2">
+                {op.busy ? 'The trained model was not sure, so a vision LLM is looking at this car.' : [a!.generation_or_years, a!.body_type].filter(known).join(' · ')}
+              </div>
+            </>
+          ) : (
+            <>
+              <h3 className="text-xl font-semibold leading-tight tracking-[-0.015em] text-ink sm:text-2xl">
+                {confident ? `${v.make} ${v.model}` : <>Likely a {v.make_guess}</>}
+              </h3>
+              <div className="mt-1 text-sm text-ink-2">{confident ? v.year : `Best guess: ${v.label}`}</div>
+            </>
+          )}
         </div>
         <div className="text-right">
-          <div className="text-3xl font-semibold leading-none tracking-[-0.02em] text-ink">{pct(confident ? v.confidence : v.make_confidence)}</div>
-          <div className="mt-1 text-xs text-muted">{confident ? 'class confidence' : 'make confidence'}</div>
+          {llmLead ? (
+            <>
+              <div className="text-2xl font-semibold capitalize leading-none tracking-[-0.02em] text-ink">{op.busy ? '…' : a!.confidence || 'n/a'}</div>
+              <div className="mt-1 text-xs text-muted">LLM's own confidence</div>
+            </>
+          ) : (
+            <>
+              <div className="text-3xl font-semibold leading-none tracking-[-0.02em] text-ink">{pct(confident ? v.confidence : v.make_confidence)}</div>
+              <div className="mt-1 text-xs text-muted">{confident ? 'class confidence' : 'make confidence'}</div>
+            </>
+          )}
         </div>
       </div>
 
-      <div className="mt-4">
-        <Meter value={v.confidence} color={STATUS_COLOR[v.status]} />
-      </div>
+      {!llmLead && (
+        <div className="mt-4">
+          <Meter value={v.confidence} color={STATUS_COLOR[v.status]} />
+        </div>
+      )}
 
       <dl className="mt-5 grid grid-cols-[1fr_1.5fr_0.8fr] gap-2 text-sm sm:gap-3">
-        {[['Make', v.make, `${pct(v.make_confidence)} make conf.`], ['Model', v.model, null], ['Year', v.year || '—', null]].map(([k, val, note]) => (
+        {(llmLead && a
+          ? [['Make', a.make, 'from the LLM'], ['Model', known(a.model) ? a.model : '—', null], ['Years', known(a.generation_or_years) ? a.generation_or_years : '—', null]]
+          : [['Make', v.make, `${pct(v.make_confidence)} make conf.`], ['Model', v.model, null], ['Year', v.year || '—', null]]
+        ).map(([k, val, note]) => (
           <div key={k} className="min-w-0 rounded-xl border border-line bg-page px-3.5 py-2.5">
             <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">{k}</dt>
-            <dd className={`mt-0.5 break-words font-medium ${confident ? 'text-ink' : 'text-ink-2'}`}>{val}</dd>
+            <dd className={`mt-0.5 break-words font-medium ${confident || (llmLead && a) ? 'text-ink' : 'text-ink-2'}`}>{op.busy && llmLead ? '…' : val}</dd>
             {note && <dd className="text-[11px] text-muted">{note}</dd>}
           </div>
         ))}
       </dl>
 
-      <div className={`mt-4 flex items-start gap-2.5 rounded-xl border px-3.5 py-2.5 text-sm ${STATUS_BOX[v.status]}`}>
-        <StatusIcon className="mt-0.5 h-4 w-4 shrink-0" />
-        <span>{v.message}</span>
-      </div>
+      {llmLead ? (
+        <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-line bg-surface-2/60 px-3.5 py-2.5 text-sm text-ink-2">
+          <IconInfo className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>
+            <span className="font-medium text-ink">Trained model was not sure:</span> best guess {v.label} ({pct(v.confidence)}, low confidence).
+            This car may be outside its known classes, so the answer above comes from {llmShort ? <b className="font-medium text-ink">{llmShort}</b> : 'a vision LLM'}.
+            The LLM is not part of the evaluated system and can be wrong.
+            {a?.clues && <span className="mt-1 block text-[13px]">LLM's clues: {a.clues}</span>}
+            {op.res && <span className="mt-1 block text-[11px] text-muted">{op.res.model} · {(op.res.latency_ms / 1000).toFixed(1)} s</span>}
+          </span>
+        </div>
+      ) : (
+        <div className={`mt-4 flex items-start gap-2.5 rounded-xl border px-3.5 py-2.5 text-sm ${STATUS_BOX[v.status]}`}>
+          <StatusIcon className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>{v.message}</span>
+        </div>
+      )}
 
       <div className="mt-6 grid gap-6 border-t border-grid pt-5 md:grid-cols-[minmax(0,1fr)_minmax(0,15rem)]">
         <div className="min-w-0">
@@ -117,6 +205,7 @@ export function VehicleCard({ v, index, total, preview, imageSize, classes, thre
         {insight && insight.text && <RunnerUp insight={insight} />}
         <WhatIf v={v} thresholds={thresholds} />
       </div>
+      {llm && preview && imageSize && !llmLead && <LLMSecondOpinion v={v} op={op} />}
     </Card>
   )
 }
@@ -179,5 +268,78 @@ function Slider({ label, value, onChange, marker, markerLabel }: { label: string
       </div>
       <div className="text-[11px] text-muted">{markerLabel} = {pct(marker)} (dark tick)</div>
     </label>
+  )
+}
+
+/** Crop the vehicle out of the original upload (8% padding, longest side at most 768 px) as a JPEG blob. */
+async function cropBlob(src: string, box: number[], size: [number, number]): Promise<Blob> {
+  const img = new Image()
+  img.src = src
+  await img.decode()
+  const [W, H] = size
+  const sx = img.naturalWidth / W
+  const sy = img.naturalHeight / H
+  const [x1, y1, x2, y2] = box
+  const px = (x2 - x1) * 0.08
+  const py = (y2 - y1) * 0.08
+  const cx1 = Math.max(0, x1 - px) * sx
+  const cy1 = Math.max(0, y1 - py) * sy
+  const cw = (Math.min(W, x2 + px) * sx) - cx1
+  const ch = (Math.min(H, y2 + py) * sy) - cy1
+  const s = Math.min(1, 768 / Math.max(cw, ch))
+  const c = document.createElement('canvas')
+  c.width = Math.max(1, Math.round(cw * s))
+  c.height = Math.max(1, Math.round(ch * s))
+  c.getContext('2d')!.drawImage(img, cx1, cy1, cw, ch, 0, 0, c.width, c.height)
+  return new Promise((resolve, reject) => c.toBlob((b) => (b ? resolve(b) : reject(new Error('Could not crop the image.'))), 'image/jpeg', 0.9))
+}
+
+/** Optional: ask a vision LLM about this crop. Useful for cars outside the trained class list; never used for the metrics.
+ *  Shares its state with the card (`op`), so an automatic low-confidence call and this button never ask twice. */
+function LLMSecondOpinion({ v, op }: { v: Vehicle; op: ReturnType<typeof useLLMOpinion> }) {
+  const { res, err, busy, ask } = op
+  const a = res?.answer
+  const sameMake = a && a.make && a.make.toLowerCase() !== 'unknown'
+    ? a.make.toLowerCase().includes(v.make.toLowerCase()) || v.make.toLowerCase().includes(a.make.toLowerCase().split(' ').pop() ?? '')
+    : null
+  return (
+    <div className="mt-4 rounded-xl border border-dashed border-line bg-page p-4 print:hidden">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 text-sm font-medium text-ink"><IconSparkles className="h-4 w-4" /> Second opinion from a vision LLM</div>
+          <p className="mt-0.5 text-xs text-muted">
+            {v.status === 'confident' ? 'Optional. ' : 'Useful when the car may not be in the trained list (for example India-only models). '}
+            Sends only this crop to an LLM on Nebius. Its answer is not part of the evaluated system and can be wrong.
+          </p>
+        </div>
+        {!res && (
+          <button onClick={() => void ask()} disabled={busy}
+            className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-ink px-3 py-1.5 text-sm font-medium text-ink hover:bg-surface-2 disabled:opacity-50">
+            {busy ? 'Asking…' : 'Ask the LLM'}
+          </button>
+        )}
+      </div>
+      {err && <div className="mt-3 rounded-lg bg-critical/8 px-3 py-2 text-xs text-critical-ink">{err}</div>}
+      {res && (
+        <div className="mt-3 text-sm">
+          {a ? (
+            <>
+              <div className="text-[15px] font-semibold text-ink">{[a.make, a.model].filter((x) => x && x.toLowerCase() !== 'unknown').join(' ') || 'Not sure'}</div>
+              <div className="text-ink-2">{[a.generation_or_years, a.body_type].filter((x) => x && x.toLowerCase() !== 'unknown').join(' · ')}</div>
+              {a.clues && <p className="mt-1.5 text-[13px] text-ink-2">{a.clues}</p>}
+              <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
+                <span className="rounded-full border border-line px-2 py-0.5 text-ink-2">LLM confidence: {a.confidence || 'n/a'}</span>
+                {sameMake !== null && (
+                  <span className={`rounded-full px-2 py-0.5 ${sameMake ? 'bg-good/10 text-good-ink' : 'bg-warning/15 text-warning-ink'}`}>
+                    {sameMake ? `agrees with the classifier on the make (${v.make})` : `differs from the classifier (${v.make})`}
+                  </span>
+                )}
+              </div>
+            </>
+          ) : <p className="whitespace-pre-wrap text-[13px] text-ink-2">{res.text}</p>}
+          <div className="mt-2 text-[11px] text-muted">{res.model} · {(res.latency_ms / 1000).toFixed(1)} s</div>
+        </div>
+      )}
+    </div>
   )
 }

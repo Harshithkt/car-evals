@@ -1,0 +1,62 @@
+{
+  "model": "convnext_tiny.fb_in22k_ft_in1k",
+  "img_size": 288,
+  "batch": 64,
+  "prices_checked": "2026-11-07",
+  "rows": [
+    {
+      "gpu": "H100",
+      "device": "NVIDIA H100 80GB HBM3",
+      "dtype": "bfloat16",
+      "img_per_s": 1461.8,
+      "peak_mem_gb": 7.3,
+      "usd_per_hour_with_8cpu_24gb": 4.518,
+      "usd_per_1M_train_images": 0.859
+    },
+    {
+      "gpu": "A100-40GB",
+      "device": "NVIDIA A100-SXM4-40GB",
+      "dtype": "bfloat16",
+      "img_per_s": 765.6,
+      "peak_mem_gb": 7.24,
+      "usd_per_hour_with_8cpu_24gb": 2.668,
+      "usd_per_1M_train_images": 0.968
+    },
+    {
+      "gpu": "L40S",
+      "device": "NVIDIA L40S",
+      "dtype": "bfloat16",
+      "img_per_s": 694.6,
+      "peak_mem_gb": 7.24,
+      "usd_per_hour_with_8cpu_24gb": 2.52,
+      "usd_per_1M_train_images": 1.008
+    },
+    {
+      "gpu": "A10",
+      "device": "NVIDIA A10",
+      "dtype": "bfloat16",
+      "img_per_s": 347.7,
+      "peak_mem_gb": 7.24,
+      "usd_per_hour_with_8cpu_24gb": 1.671,
+      "usd_per_1M_train_images": 1.335
+    },
+    {
+      "gpu": "L4",
+      "device": "NVIDIA L4",
+      "dtype": "bfloat16",
+      "img_per_s": 217.1,
+      "peak_mem_gb": 7.24,
+      "usd_per_hour_with_8cpu_24gb": 1.368,
+      "usd_per_1M_train_images": 1.751
+    },
+    {
+      "gpu": "T4",
+      "device": "Tesla T4",
+      "dtype": "float16",
+      "img_per_s": 156.2,
+      "peak_mem_gb": 7.24,
+      "usd_per_hour_with_8cpu_24gb": 1.159,
+      "usd_per_1M_train_images": 2.062
+    }
+  ]
+}

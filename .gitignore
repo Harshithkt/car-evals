@@ -23,3 +23,11 @@ P5_artifacts*/
 P5_plots*/
 *.zip
 
+
+# All-cars model: the 111 MB PyTorch checkpoint is over GitHub's limit (the INT8 ONNX model is committed)
+artifacts_modern/classifier_best.pth
+artifacts_modern.bak-*/
+
+# Local secrets (NEBIUS_API_KEY for the optional LLM second opinion)
+.env
+.env.*

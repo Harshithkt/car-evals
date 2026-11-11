@@ -39,6 +39,10 @@ export default function Recognize({ health, current, history, commit, restore, c
   const camAvailable = (health?.gradcam_available ?? true) && engine === 'torch'
   const thresholds = health?.thresholds ?? {}
   const result = current?.result ?? null
+  const model = health?.model ?? 'allcars'
+  // each model gets its own samples, so the ground truth uses the same label set as the prediction
+  const modelSamples = samples.filter((s) => (s.model ?? 'stanford') === model)
+  const shownSamples = modelSamples.length ? modelSamples : samples
 
   useEffect(() => {
     api.samples().then(setSamples).catch(() => setSamples([]))
@@ -78,7 +82,7 @@ export default function Recognize({ health, current, history, commit, restore, c
         engine: opts.live && hasOnnx ? 'onnx' : engine,
         timeoutMs: opts.live ? 20_000 : 90_000,
       })
-      commit({ id: uid(), at: Date.now(), name, preview, result: r, groundTruth: opts.gt ?? null, source: opts.source }, !opts.live)
+      commit({ id: uid(), at: Date.now(), name, preview, result: r, groundTruth: opts.gt ?? null, source: opts.source, live: !!opts.live }, !opts.live)
       if (!opts.live) setView('annotated')
     } catch (e) {
       URL.revokeObjectURL(preview)
@@ -92,7 +96,7 @@ export default function Recognize({ health, current, history, commit, restore, c
   async function runSample(s: Sample) {
     try {
       const b = await (await fetch(api.sampleUrl(s))).blob()
-      await run(b, `${s.name}.jpg`, { gt: s.ground_truth, source: 'sample' })
+      await run(b, `${s.name}.jpg`, { gt: (s.model ?? 'stanford') === model ? s.ground_truth : null, source: 'sample' })
     } catch {
       setError('Could not load the sample image from the backend.')
     }
@@ -123,7 +127,8 @@ export default function Recognize({ health, current, history, commit, restore, c
 
       <div className="print:hidden">
         <PageHeader eyebrow="Recognize" title="Identify vehicles in a photo">
-          Upload a photo or use your camera. The system detects every car and reports its make, model and year with a calibrated confidence.
+          Upload a photo or use your camera. The system detects every car and reports its make, model and {model === 'allcars' ? 'generation (with its years)' : 'year'} with a calibrated confidence.
+          {model === 'allcars' ? ' The all-cars model knows about 1,300 generations from 1948 to 2026.' : ' The Stanford Cars model knows 196 classes from 1991 to 2012.'}
         </PageHeader>
       </div>
 
@@ -188,17 +193,21 @@ export default function Recognize({ health, current, history, commit, restore, c
                   </select>
                 </label>
               )}
-              {engine === 'onnx' && <p className="text-xs text-muted">INT8 is 3.3× smaller and much faster on CPU (top-1 94.7% vs 94.6% FP32 on 1,000 test crops). Grad-CAM needs PyTorch.</p>}
+              {engine === 'onnx' && <p className="text-xs text-muted">{model === 'stanford'
+                ? 'INT8 is 3.3× smaller and much faster on CPU (top-1 94.7% vs 94.6% FP32 on 1,000 test crops). Grad-CAM needs PyTorch.'
+                : 'INT8 is 3.3× smaller and about twice as fast on CPU, with almost the same answers as FP32 (see the All-cars model page). Grad-CAM needs PyTorch.'}</p>}
               {mode === 'camera' && hasOnnx && <p className="text-xs text-muted">Live mode always uses the INT8 engine for speed.</p>}
               {!hasOnnx && !camAvailable && <p className="text-xs text-muted">Grad-CAM needs the PyTorch backend (BACKEND=torch).</p>}
             </div>
           </Card>
 
-          {samples.length > 0 && mode === 'upload' && (
-            <Card title="Sample images" subtitle="Unseen Stanford Cars test images">
+          {shownSamples.length > 0 && mode === 'upload' && (
+            <Card title="Sample images" subtitle={modelSamples.length && model === 'allcars'
+              ? 'Unseen test photos of cars launched 2020 or later (Wikimedia Commons; hover for credits)' : 'Unseen Stanford Cars test images'}>
               <div className="grid grid-cols-3 gap-2">
-                {samples.map((s) => (
-                  <button key={s.name} onClick={() => runSample(s)} disabled={busy} title={s.ground_truth ?? s.name}
+                {shownSamples.map((s) => (
+                  <button key={s.name} onClick={() => runSample(s)} disabled={busy}
+                    title={[s.ground_truth ?? s.name, s.credit ? `Photo: ${s.credit.author}, ${s.credit.licence}` : ''].filter(Boolean).join('\n')}
                     className="group relative overflow-hidden rounded-lg ring-1 ring-line transition hover:ring-2 hover:ring-ink focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-50">
                     <img src={api.sampleUrl(s)} alt={s.ground_truth ?? s.name} className="aspect-[4/3] w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                   </button>
@@ -250,7 +259,10 @@ export default function Recognize({ health, current, history, commit, restore, c
             </div>
           )}
 
-          {mode === 'upload' && !result && !busy && <EmptyState onSample={samples[4] ? () => runSample(samples[4]) : undefined} />}
+          {mode === 'upload' && !result && !busy && (
+            <EmptyState allCars={model === 'allcars'}
+              onSample={shownSamples.length ? () => runSample(shownSamples[Math.min(4, shownSamples.length - 1)]) : undefined} />
+          )}
 
           {mode === 'upload' && (result || busy) && (
             <Card
@@ -323,7 +335,8 @@ export default function Recognize({ health, current, history, commit, restore, c
           {!(busy && mode === 'upload') && result && (mode === 'upload' || current?.source === 'camera') &&
             result.vehicles.map((v, i) => (
               <VehicleCard key={`${current!.id}-${i}`} v={v} index={i} total={result.vehicles.length} preview={current!.preview}
-                imageSize={result.image_size} classes={classes} thresholds={thresholds} />
+                imageSize={result.image_size} classes={classes} thresholds={thresholds} llm={health?.llm_available ?? false}
+                autoLLM={!current!.live} cacheKey={`${current!.id}-${i}`} />
             ))}
           {result && result.vehicles.length === 0 && !busy && (
             <Card><p className="text-sm text-ink-2">No vehicle was found in this image.</p></Card>
@@ -343,10 +356,10 @@ function Chip({ label, value, icon }: { label: string; value: string; icon?: boo
   )
 }
 
-function EmptyState({ onSample }: { onSample?: () => void }) {
+function EmptyState({ onSample, allCars }: { onSample?: () => void; allCars: boolean }) {
   const steps = [
     ['Detect', 'YOLOv8 finds every vehicle, with classical fallbacks'],
-    ['Classify', 'ConvNeXt + classical features score 196 classes'],
+    ['Classify', allCars ? 'ConvNeXt scores about 1,300 car generations from 1948 to 2026' : 'ConvNeXt + classical features score 196 classes'],
     ['Explain', 'Calibrated confidence, top-5, runner-up analysis and Grad-CAM'],
   ]
   return (

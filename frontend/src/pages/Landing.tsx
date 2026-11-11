@@ -1,10 +1,10 @@
 import { useRef } from 'react'
 import type { ReactNode } from 'react'
-import type { Health, Metrics, Row } from '../lib/api'
+import type { CarsMetrics, Health, Metrics, Row } from '../lib/api'
 import { ms, num, pct } from '../lib/format'
 import {
   IconArrowRight, IconCamera, IconPlay, IconChart, IconCheck, IconCpu, IconEye, IconFlask, IconGrid, IconHelp, IconLayers, IconMerge, IconScan,
-  IconSearch, IconShield, IconSliders,
+  IconSearch, IconShield, IconSliders, IconSparkles,
 } from '../components/icons'
 import { StatusBadge } from '../components/ui'
 import { LogoMark } from '../components/Logo'
@@ -30,7 +30,7 @@ const HERO = {
 
 const find = (o: Record<string, Row> | undefined, prefix: string) => (o ? Object.entries(o).find(([k]) => k.startsWith(prefix))?.[1] : undefined)
 
-export default function Landing({ metrics, health, go }: { metrics: Metrics | null; health: Health | null; go: Go }) {
+export default function Landing({ metrics, carsMetrics, health, go }: { metrics: Metrics | null; carsMetrics: CarsMetrics | null; health: Health | null; go: Go }) {
   const how = useRef<HTMLElement>(null)
   const results = useRef<HTMLElement>(null)
   const tools = useRef<HTMLElement>(null)
@@ -46,7 +46,7 @@ export default function Landing({ metrics, health, go }: { metrics: Metrics | nu
     <div className="bg-page">
       {/* ================= ANNOUNCEMENT BAR (dark bookend) ================= */}
       <div className="bg-carbon px-4 py-2 text-center text-[12px] font-medium text-white">
-        Live demo: upload a photo, use your camera, or stress-test the model.{' '}
+        New: the all-cars model names about 1,300 car generations, up to 2026 models.{' '}
         <button onClick={() => go('recognize')} className="font-semibold text-accent hover:underline">Try it now</button>
       </div>
 
@@ -74,7 +74,7 @@ export default function Landing({ metrics, health, go }: { metrics: Metrics | nu
         <div className="mx-auto grid max-w-[1200px] items-center gap-12 px-4 pb-16 pt-14 sm:px-6 md:pb-24 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:pt-20">
           <div>
             <p className="mb-5 inline-flex items-center gap-2 rounded-md bg-surface-2 px-2.5 py-1 text-[12px] font-medium text-ink-2">
-              Stanford Cars, 196 classes, classical CV + deep learning
+              Cars from 1948 to 2026, classical CV + deep learning
             </p>
             <h1 className="text-[44px] font-semibold leading-[1.02] tracking-[-0.03em] sm:text-[56px] lg:text-[60px] lg:leading-none xl:text-[64px]">
               Identify the make, model and year of a car from one photo.
@@ -109,7 +109,10 @@ export default function Landing({ metrics, health, go }: { metrics: Metrics | nu
           <Stat value={num(det?.yolov8s_finetuned?.mAP50, 3)} label="Detection mAP@0.5" note="fine-tuned YOLOv8s" />
           <Stat value="196" label="Vehicle classes" note="8,041 unseen test images" />
         </div>
+        <p className="mt-3 text-center text-[13px] text-muted">Stanford Cars benchmark model. The all-cars model is below.</p>
       </section>
+
+      <AllCarsBand m={carsMetrics} go={go} />
 
       {/* ================= HOW IT WORKS ================= */}
       <section ref={how} className="mx-auto max-w-6xl scroll-mt-6 px-4 py-24 sm:px-6">
@@ -182,7 +185,7 @@ export default function Landing({ metrics, health, go }: { metrics: Metrics | nu
           <Tool icon={<IconHelp className="h-5 w-5" />} title="Why not the runner-up?" tab="recognize" go={go}
             text="Every result explains its closest rival: a year change, a sibling model, or a look-alike from another brand." />
           <Tool icon={<IconSearch className="h-5 w-5" />} title="Coverage catalogue" tab="catalogue" go={go}
-            text="Can it recognise my car? Search all 196 classes by make, model, year and body style." />
+            text="Can it recognise my car? Search every class of either model by make, model and year." />
         </div>
       </section>
 
@@ -317,6 +320,48 @@ function HeroShot() {
   )
 }
 
+/** The all-cars model in numbers (artifacts_modern/metrics.json). Hidden until that model's metrics exist. */
+function AllCarsBand({ m, go }: { m: CarsMetrics | null; go: Go }) {
+  if (!m?.test) return null
+  const era = (name: string) => m.by_era?.find((e) => e.era === name)
+  const recent = era('2020 and newer')
+  return (
+    <section className="mx-auto max-w-[1200px] px-4 pt-20 sm:px-6">
+      <div className="grid items-center gap-10 rounded-2xl border border-line bg-white p-6 sm:p-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+        <div>
+          <div className="text-[14px] font-medium text-muted">All-cars model</div>
+          <h2 className="mt-2 text-[32px] font-semibold leading-[1.15] tracking-[-0.02em] text-ink sm:text-[40px]">Not just 2012. Cars up to 2026.</h2>
+          <p className="mt-4 text-[16px] leading-[1.5] text-ink-2">
+            A second classifier, trained on about {Math.round((m.dataset?.images_used ?? 180000) / 1000)},000 real-world photos, names
+            {' '}{m.dataset?.classes?.toLocaleString() ?? 'about 1,300'} generations of {m.dataset?.models ?? '500+'} models from {m.dataset?.makes ?? 60} makes,
+            from 1948 to the 2026 model year: the Mustang S650, the Ioniq 6, the Cybertruck and the latest RAV4 included. Same detector, same pipeline, same confidence rules.
+          </p>
+          <button onClick={() => go('allcars')} className="mt-6 inline-flex items-center gap-2 text-[14px] font-semibold text-ink hover:text-ink-2">
+            See how it was trained and tested <IconArrowRight className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="grid grid-cols-2 overflow-hidden rounded-xl border border-line [&>*:nth-child(odd)]:border-r [&>*:nth-child(-n+2)]:border-b [&>*]:border-line">
+          <Cell value={pct(m.test.top1)} label="Exact generation" note={`${m.test.n.toLocaleString()} unseen test photos`} />
+          <Cell value={pct(m.test.make_acc)} label="Make accuracy" note={`top-5 ${pct(m.test.top5)}`} />
+          <Cell value={recent ? pct(recent.top1) : '—'} label="Cars from 2020 on" note={recent ? `exact generation, ${recent.n.toLocaleString()} test photos` : 'exact generation'} />
+          <Cell value={m.training?.cost_usd_total_estimate != null ? `$${m.training.cost_usd_total_estimate.toFixed(2)}` : '—'} label="Training cost"
+            note={`one ${m.training?.gpu ?? 'GPU'}, ${m.training?.total_minutes ?? '—'} min`} />
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function Cell({ value, label, note }: { value: string; label: string; note: string }) {
+  return (
+    <div className="px-5 py-5 sm:px-6">
+      <div className="text-[30px] font-semibold leading-none tracking-[-0.02em] text-ink sm:text-[40px]">{value}</div>
+      <div className="mt-2 text-sm font-medium text-ink">{label}</div>
+      <div className="text-xs text-muted">{note}</div>
+    </div>
+  )
+}
+
 /* ---------------- small building blocks ---------------- */
 function Stat({ value, label, note }: { value: string; label: string; note: string }) {
   return (
@@ -425,8 +470,9 @@ export function Footer({ go, wide }: { go: Go; wide?: boolean }) {
         <div>
           <div className="flex items-center gap-2 font-semibold text-white"><LogoMark className="h-7 w-7" /> Fine-Grained Vehicle Recognition</div>
           <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-[#b9bbc6]">
-            P5: Intelligent Fine-Grained Vehicle Recognition and Analysis System. Trained on Stanford Cars (16,185 images, 196 classes). The dataset has no
-            number plates or video, so licence-plate reading and tracking are out of scope.
+            P5: Intelligent Fine-Grained Vehicle Recognition and Analysis System. Benchmarked on Stanford Cars (16,185 images, 196 classes); the all-cars
+            model adds about 180,000 Wikimedia Commons photos of about 1,300 generations up to 2026. The data has no number plates or video, so licence-plate
+            reading and tracking are out of scope.
           </p>
         </div>
         <div>
@@ -440,7 +486,7 @@ export function Footer({ go, wide }: { go: Go; wide?: boolean }) {
         <div>
           <div className="mb-2 text-[14px] font-semibold text-white">Evaluation</div>
           <ul className="space-y-1.5 text-[#b9bbc6]">
-            {([['comparison', 'Model comparison', IconChart], ['robustness', 'Robustness & confidence', IconShield], ['failures', 'Failure analysis', IconEye], ['about', 'About the system', IconCpu]] as const).map(([id, l, I]) => (
+            {([['allcars', 'All-cars model', IconSparkles], ['comparison', 'Model comparison', IconChart], ['robustness', 'Robustness & confidence', IconShield], ['failures', 'Failure analysis', IconEye], ['about', 'About the system', IconCpu]] as const).map(([id, l, I]) => (
               <li key={id}><button onClick={() => go(id)} className="inline-flex items-center gap-2 hover:text-white"><I className="h-4 w-4" />{l}</button></li>
             ))}
           </ul>

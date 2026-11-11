@@ -22,6 +22,8 @@ export default function About({ metrics, plots }: { metrics: Metrics | null; plo
       <PageHeader eyebrow="About" title="About this system">
         P5: Intelligent Fine-Grained Vehicle Recognition and Analysis. Given a photo, the system localises each car and identifies its
         make, model and year among 196 Stanford Cars classes, using a hybrid of classical computer vision and deep learning.
+        A second model, trained on about 180,000 Wikimedia Commons photos, extends the same pipeline to about 1,300 car generations from 1948 to 2026
+        (see the All-cars model page). The evaluation pages describe the Stanford Cars benchmark model unless they say otherwise.
       </PageHeader>
 
       {metrics?.requirements_summary && (
@@ -70,7 +72,7 @@ export default function About({ metrics, plots }: { metrics: Metrics | null; plo
         <Card title="Scope and constraints">
           <ul className="list-disc space-y-1 pl-4 text-[13px] text-ink-2">
             <li>The dataset has no number-plate annotations or video, so the system does <b>not</b> do licence-plate recognition or vehicle tracking.</li>
-            <li>Only the 196 Stanford Cars classes (mostly 1990s–2012 US-market cars) can be recognised. Newer or unseen models get the closest known class, which is why the confidence handling matters.</li>
+            <li>The Stanford Cars model only knows its 196 classes (mostly 1990s to 2012 US-market cars). The all-cars model covers about 1,300 generations up to 2026, but it is still mostly US-market: India-only models such as Maruti Suzuki, Tata or Mahindra are not in its list. Unknown cars get the closest known class, which is why the confidence handling matters.</li>
             <li>Grad-CAM is computed for the first detected vehicle only, and only with the PyTorch backend.</li>
           </ul>
         </Card>

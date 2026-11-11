@@ -1,0 +1,246 @@
+{
+ "samples": [
+  {
+   "file": "recent_00.jpg",
+   "author": "Jason Lawrence",
+   "licence": "cc-by-2.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3AMiami_Police_Department_New_Ford_Police_Interceptor_Utility_No._222423.jpg",
+   "label": "Ford Explorer 6th gen 2020-2026",
+   "class_id": 420
+  },
+  {
+   "file": "recent_01.jpg",
+   "author": "Ethan Llamas",
+   "licence": "cc-by-sa-4.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3AToyota_Sienna_AXLH40_2.5_XSE_HEV_Ice_Cap.jpg",
+   "label": "Toyota Sienna XL40 2021-2026",
+   "class_id": 1211
+  },
+  {
+   "file": "recent_02.jpg",
+   "author": "Dinkun Chen",
+   "licence": "cc-by-sa-4.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3ACADILLAC_CT5_China_%2814%29.jpg",
+   "label": "Cadillac CT5 1st gen 2020-2026",
+   "class_id": 171
+  },
+  {
+   "file": "recent_03.jpg",
+   "author": "TTTNIS",
+   "licence": "cc0",
+   "source": "https://commons.wikimedia.org/wiki/File%3ALexus_GX550_Overtrail_Plus.jpg",
+   "label": "Lexus GX J250 2024-2026",
+   "class_id": 745
+  },
+  {
+   "file": "recent_04.jpg",
+   "author": "Damian B Oh",
+   "licence": "cc-by-sa-4.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3AHyundai_IONIQ_5_N_NE_N_Abyss_Black_Pearl_%281%29.jpg",
+   "label": "Hyundai Ioniq 5 NE 2022-2026",
+   "class_id": 589
+  },
+  {
+   "file": "recent_05.jpg",
+   "author": "Tokumeigakarinoaoshima",
+   "licence": "cc-by-sa-4.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3AThe_tire_wheel_of_Land_Rover_RANGE_ROVER_EVOQUE_D180_SE_%283DA-LZ2NA%29.jpg",
+   "label": "Land Rover Range Rover Evoque L551 2020-2026",
+   "class_id": 730
+  },
+  {
+   "file": "recent_06.jpg",
+   "author": "Damian B Oh",
+   "licence": "cc-by-sa-4.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3AKia_K5_Hybrid_DL3_HEV_PE_Aurora_Black_Pearl_%2833%29.jpg",
+   "label": "Kia Optima K5 2021-2026",
+   "class_id": 685
+  },
+  {
+   "file": "recent_07.jpg",
+   "author": "Aarav Dhond",
+   "licence": "cc-by-sa-4.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3A2023_Chevrolet_Colorado_Rear_View.jpg",
+   "label": "Chevrolet Colorado 3rd gen 2023-2026",
+   "class_id": 241
+  },
+  {
+   "file": "recent_08.jpg",
+   "author": "Damian B Oh",
+   "licence": "cc-by-sa-4.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3AMercedes-Benz_V223_S_580_4MATIC_AMG_Line_High_Tech_Silver_%2811%29.jpg",
+   "label": "Mercedes-Benz S-Class W223 2021-2026",
+   "class_id": 882
+  },
+  {
+   "file": "recent_09.jpg",
+   "author": "Aos.1905",
+   "licence": "cc-by-sa-4.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3ANissan_Leaf_B7_G_%28front_view%29_at_LaLaport_Kadoma.jpg",
+   "label": "Nissan Leaf ZE2 2026",
+   "class_id": 957
+  },
+  {
+   "file": "recent_10.jpg",
+   "author": "Alexandre Prevot",
+   "licence": "cc-by-sa-2.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3ABMW_M4_Competition_Coup%C3%A9_G82_%2851341348473%29_%28cropped%29.jpg",
+   "label": "BMW M4 G82 2021-2026",
+   "class_id": 113
+  },
+  {
+   "file": "recent_11.jpg",
+   "author": "Kenneth C. Zirkel",
+   "licence": "cc-by-4.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3ATesla_CyberTruck_in_Barre%2C_Vermont.jpg",
+   "label": "Tesla Cybertruck 1st gen 2024-2026",
+   "class_id": 1127
+  }
+ ],
+ "failures": [
+  {
+   "file": "fail_00.jpg",
+   "author": "Greg Gjerdingen from Willmar, USA",
+   "licence": "cc-by-2.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3A05_Dodge_Magnum_%26_Chrysler_300C_%288749540120%29.jpg",
+   "true": "Dodge Magnum LX 2005-2008",
+   "pred": "Chrysler 300 LX 2005-2010",
+   "confidence": 0.9988662004470825
+  },
+  {
+   "file": "fail_01.jpg",
+   "author": "Rutger van der Maar",
+   "licence": "cc-by-2.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3AInfiniti_FX50_S_Vettel_Edition_rear.jpg",
+   "true": "Infiniti FX35 S50 2003-2008",
+   "pred": "Infiniti FX35 S51 2009-2012",
+   "confidence": 0.9987899661064148
+  },
+  {
+   "file": "fail_02.jpg",
+   "author": "Yu Chu Chin",
+   "licence": "cc-by-sa-4.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3ABrodie_Kostecki%27s_Ford_Mustang_Supercar_at_the_2025_Adelaide_Grand_Final_Parade_-_01.jpg",
+   "true": "Chevrolet Camaro 6th gen 2016-2024",
+   "pred": "Ford Mustang S650 2024-2026",
+   "confidence": 0.9987655878067017
+  },
+  {
+   "file": "fail_03.jpg",
+   "author": "Guillaume Vachey from Chalon sur Saone, France",
+   "licence": "cc0",
+   "source": "https://commons.wikimedia.org/wiki/File%3AMercedes_E-Class_Ambulance_%2843254780495%29.jpg",
+   "true": "Mercedes-Benz E-Class W210 1996-2002",
+   "pred": "Mercedes-Benz E-Class W212 2010-2016",
+   "confidence": 0.9986152648925781
+  },
+  {
+   "file": "fail_04.jpg",
+   "author": "Fran\u00e7ois GOGLINS",
+   "licence": "cc-by-sa-4.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3ASuippes-FR-51-Polizeiwagen-a2.jpg",
+   "true": "Porsche Boxster 981 2013-2016",
+   "pred": "Porsche Cayman 981c 2014-2016",
+   "confidence": 0.9985514283180237
+  },
+  {
+   "file": "fail_05.jpg",
+   "author": "Tokumeigakarinoaoshima",
+   "licence": "cc-by-sa-4.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3AHonda_CIVIC_TYPE_R_%28ABA-FD2_%26_DBA-FK2%29_RACING_CONTROL_of_SUZUKA_CIRCUIT.jpg",
+   "true": "Honda Civic 8th gen 2006-2011",
+   "pred": "Honda Civic 9th gen 2012-2015",
+   "confidence": 0.9985186457633972
+  },
+  {
+   "file": "fail_06.jpg",
+   "author": "Bindydad123",
+   "licence": "cc-by-sa-4.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3APorsche_Macan_and_Porsche_Boxster_%281%29.jpg",
+   "true": "Porsche Boxster 982 2017-2026",
+   "pred": "Porsche Macan 95B 2015-2024",
+   "confidence": 0.9984415173530579
+  },
+  {
+   "file": "fail_07.jpg",
+   "author": "Greg Gjerdingen from Willmar, USA",
+   "licence": "cc-by-2.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3A05_Dodge_Magnum_%26_Chrysler_300C_%288748418939%29.jpg",
+   "true": "Dodge Magnum LX 2005-2008",
+   "pred": "Chrysler 300 LX 2005-2010",
+   "confidence": 0.9982184767723083
+  },
+  {
+   "file": "fail_08.jpg",
+   "author": "Greg Gjerdingen from Willmar, USA",
+   "licence": "cc-by-2.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3A2004_Lincoln_Town_Car_Limousine_%2818546410021%29.jpg",
+   "true": "Lincoln Town Car 1990-1997",
+   "pred": "Toyota Corolla E130 2003-2008",
+   "confidence": 0.998197615146637
+  },
+  {
+   "file": "fail_09.jpg",
+   "author": "Rutger van der Maar",
+   "licence": "cc-by-2.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3AInfiniti_FX50_S_Vettel_Edition_front.jpg",
+   "true": "Infiniti FX35 S50 2003-2008",
+   "pred": "Infiniti FX35 S51 2009-2012",
+   "confidence": 0.9981365203857422
+  },
+  {
+   "file": "fail_10.jpg",
+   "author": "Andr\u00e9 Gustavo Stumpf from Brasil",
+   "licence": "cc-by-2.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3AHighway_Patrol_%286060290736%29.jpg",
+   "true": "Dodge Charger LX 2006-2010",
+   "pred": "Ford Crown Victoria 1998-2011",
+   "confidence": 0.9981328845024109
+  },
+  {
+   "file": "fail_11.jpg",
+   "author": "Michael Barera",
+   "licence": "cc-by-sa-4.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3A2022_Downtown_West_Allis_Classic_Car_Show_070_%281960_Cadillac_DeVille%29.jpg",
+   "true": "Cadillac Deville 1959-1960 1959-1960",
+   "pred": "Cadillac Deville 1965-1970 1965-1970",
+   "confidence": 0.9980806112289429
+  },
+  {
+   "file": "fail_12.jpg",
+   "author": "Shadman Samee from Dhaka, Bangladesh",
+   "licence": "cc-by-sa-2.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3AToyota_GT86_and_Mazda_MX-5%2C_Bangladesh._%2834324765815%29.jpg",
+   "true": "Mazda MX-5 Miata ND 2016-2026",
+   "pred": "Toyota 86 ZN6 2013-2020",
+   "confidence": 0.9978625178337097
+  },
+  {
+   "file": "fail_13.jpg",
+   "author": "Mariordo (Mario Roberto Dur\u00e1n Ortiz)",
+   "licence": "cc-by-sa-4.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3A2022_Three_electric_cars_in_CRI_4156.jpg",
+   "true": "Ford EcoSport B515 2018-2022",
+   "pred": "BMW i3 I01 2014-2021",
+   "confidence": 0.9977794289588928
+  },
+  {
+   "file": "fail_14.jpg",
+   "author": "Alexandre Prevot from Nancy, France",
+   "licence": "cc-by-sa-4.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3AMercedes-Benz_SL_63_AMG_%2855209653689%29.jpg",
+   "true": "Mercedes-Benz SL R232 2022-2026",
+   "pred": "Mercedes-Benz SL R230 2003-2012",
+   "confidence": 0.9977591037750244
+  },
+  {
+   "file": "fail_15.jpg",
+   "author": "Fran\u00e7ois GOGLINS",
+   "licence": "cc-by-sa-4.0",
+   "source": "https://commons.wikimedia.org/wiki/File%3ASuippes-FR-51-Polizeiwagen-a1.jpg",
+   "true": "Porsche Boxster 981 2013-2016",
+   "pred": "Porsche Cayman 981c 2014-2016",
+   "confidence": 0.9976812601089478
+  }
+ ]
+}

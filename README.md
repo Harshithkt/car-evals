@@ -6,8 +6,7 @@
 
 **Identify the make, model and year of a car from a single photo: 1,291 car generations from 1948 to 2026,
 plus the 196-class Stanford Cars benchmark.**
-A hybrid system of classical computer vision, YOLOv8 detection and ConvNeXt classifiers, with calibrated confidence,
-low-confidence handling, visual explanations and an optional vision-LLM fallback for unknown cars, served as a FastAPI + React web app.
+A hybrid system combining classical computer vision techniques, YOLOv8 object detection, and ConvNeXt classifiers to identify and classify vehicles accurately. It incorporates calibrated confidence scores, low-confidence prediction handling, and visual explanations to improve reliability and interpretability. An optional Vision-LLM fallback is integrated to recognize unknown or unfamiliar car models. The system also provides real-time image processing, robust vehicle classification, and an interactive user interface. It is deployed as a FastAPI backend with a React-based web application, ensuring efficient communication, scalability, and a user-friendly experience.
 
 [**Live demo**](https://harshithkt06--p5-vehicle-app-web.us-east.modal.run) ·
 [Results](#results) ·

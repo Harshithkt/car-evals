@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import type { Metrics, Row } from '../lib/api'
 import { mb, ms, num, pct } from '../lib/format'
 import { BarList, GroupedBars, Lines } from '../components/charts'
 import { DataTable } from '../components/DataTable'
 import { Plot } from '../components/Plot'
+import { ShiftLights, Speedometer } from '../components/Speedometer'
 import { Card, Missing, PageHeader, StatTile } from '../components/ui'
 
 const n = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : null)
@@ -34,10 +36,11 @@ export default function Comparison({ metrics, plots }: { metrics: Metrics | null
   const ac = metrics.approach_comparison
   const det = metrics.detection
   const hist = metrics.classifier_training?.history
+  const [selectedApproach, setSelectedApproach] = useState<string | null>(null)
 
   return (
     <div className="space-y-5">
-      <PageHeader eyebrow="Evaluation" title="Model comparison">
+      <PageHeader eyebrow="Evaluation · Performance Telemetry" title="Model comparison">
         Classical features vs deep learning vs the hybrid system, evaluated on the unseen Stanford Cars test set (8,041 images).
       </PageHeader>
 
@@ -46,8 +49,112 @@ export default function Comparison({ metrics, plots }: { metrics: Metrics | null
         const { series, rows } = pivot(ac, [['top1', 'Top-1'], ['top5', 'Top-5'], ['make_acc', 'Make'], ['make_model_acc', 'Make + model']])
         const names = Object.keys(ac)
         const best = names.reduce((a, b) => ((n(ac[b]?.top1) ?? 0) > (n(ac[a]?.top1) ?? 0) ? b : a), names[0])
+        const activeKey = selectedApproach && ac[selectedApproach] ? selectedApproach : best
+        const activeRow = ac[activeKey] ?? {}
+        const gearMap: Record<string, { gear: string; mode: string; color: string }> = {
+          Classical: { gear: '1ST', mode: 'ECO · CLASSICAL CV', color: '#fab219' },
+          'Deep learning': { gear: '5TH', mode: 'SPORT · CONVNEXT-TINY', color: '#21a4ff' },
+          Hybrid: { gear: 'S+', mode: 'TRACK · HYBRID FUSION', color: '#00f283' },
+        }
+        const activeMeta = gearMap[shortApproach(activeKey)] ?? { gear: 'D', mode: 'TELEMETRY', color: '#21a4ff' }
+
         return (
           <>
+            {/* Automotive Instrument Cluster for the Accuracy Table */}
+            <Card
+              title="Digital Instrument Cluster · Accuracy & Dyno Telemetry"
+              subtitle="Select a powertrain (approach) below or click any row in the accuracy table to spin the gauges"
+              actions={
+                <div className="inline-flex flex-wrap items-center gap-1.5 rounded-xl border border-line bg-[#0d0f13] p-1">
+                  {names.map((k) => {
+                    const label = shortApproach(k)
+                    const isSel = k === activeKey
+                    const meta = gearMap[label]
+                    return (
+                      <button
+                        key={k}
+                        type="button"
+                        onClick={() => setSelectedApproach(k)}
+                        className={`inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                          isSel
+                            ? 'bg-surface-2 text-white shadow-[0_0_16px_rgba(33,164,255,0.25)] ring-1 ring-accent'
+                            : 'text-ink-2 hover:text-ink'
+                        }`}
+                      >
+                        <span
+                          className="rounded px-1.5 py-0.5 font-mono text-[10px] font-bold"
+                          style={{
+                            background: isSel ? meta?.color ?? '#21a4ff' : '#1e2229',
+                            color: isSel ? '#081014' : '#9a9ca2',
+                          }}
+                        >
+                          {meta?.gear ?? 'D'}
+                        </span>
+                        {label}
+                      </button>
+                    )
+                  })}
+                </div>
+              }
+            >
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/10 bg-[#0d1014] px-4 py-2.5 font-mono text-xs">
+                <div className="flex items-center gap-2.5">
+                  <span className="h-2 w-2 animate-ping rounded-full" style={{ background: activeMeta.color }} />
+                  <span className="font-bold tracking-wider text-ink">{activeMeta.mode}</span>
+                  <span className="hidden text-muted sm:inline">· {activeKey}</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-4 text-[11px] text-ink-2">
+                  <span>WEIGHT: <strong className="text-ink">{mb(n(activeRow.size_mb))}</strong></span>
+                  <span>0–PREDICTION: <strong className="text-good-ink">{ms(n(activeRow.ms_per_image))}</strong></span>
+                  <span>TEST SAMPLES: <strong className="text-ink">8,041</strong></span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <Speedometer
+                  value={n(activeRow.top1)}
+                  label="Top-1 Exact Accuracy"
+                  sublabel="Make + Model + Year"
+                  color={activeMeta.color}
+                  gear={activeMeta.gear}
+                  badge="RPM · TOP-1"
+                />
+                <Speedometer
+                  value={n(activeRow.make_acc)}
+                  label="Make Accuracy"
+                  sublabel="Brand identification"
+                  color="#00f283"
+                  gear={activeMeta.gear}
+                  badge="BOOST · MAKE"
+                />
+                <Speedometer
+                  value={n(activeRow.make_model_acc)}
+                  label="Make + Model"
+                  sublabel="Ignoring facelift year"
+                  color="#21a4ff"
+                  gear={activeMeta.gear}
+                  badge="TORQUE · MODEL"
+                />
+                <Speedometer
+                  value={n(activeRow.top5)}
+                  label="Top-5 Recall"
+                  sublabel="Correct class in top 5"
+                  color="#3df5a0"
+                  gear={activeMeta.gear}
+                  badge="REDLINE · TOP-5"
+                />
+              </div>
+
+              <div className="mt-4">
+                <ShiftLights
+                  value={n(activeRow.top1) ?? 0}
+                  segments={20}
+                  label={`Tachometer Shift Strip · ${shortApproach(activeKey)}`}
+                  rightText={`${pct(activeRow.top1)} TOP-1 · ${pct(activeRow.make_acc)} MAKE · ${ms(activeRow.ms_per_image)}`}
+                />
+              </div>
+            </Card>
+
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
               <StatTile label="Best top-1 accuracy" value={pct(ac[best]?.top1)} note={shortApproach(best)} />
               <StatTile label="Best make accuracy" value={pct(ac[best]?.make_acc)} note={shortApproach(best)} />
@@ -69,8 +176,21 @@ export default function Comparison({ metrics, plots }: { metrics: Metrics | null
               <div className="mt-5">
                 <DataTable
                   data={ac}
-                  firstCol="Approach"
-                  highlight={(k) => k === best}
+                  firstCol="Powertrain / Approach"
+                  highlight={(k) => k === activeKey}
+                  renderName={(k) => (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedApproach(k)}
+                      className="inline-flex items-center gap-2 text-left hover:text-accent"
+                      title="Click to load into the speedometer cluster above"
+                    >
+                      <span className="rounded border border-white/15 bg-black/40 px-1.5 py-0.5 font-mono text-[10px] font-bold text-accent">
+                        {gearMap[shortApproach(k)]?.gear ?? 'D'}
+                      </span>
+                      <span>{k}</span>
+                    </button>
+                  )}
                   columns={[
                     { key: 'top1', label: 'Top-1' }, { key: 'top5', label: 'Top-5' }, { key: 'make_acc', label: 'Make' },
                     { key: 'make_model_acc', label: 'Make + model' }, { key: 'size_mb', label: 'Size' }, { key: 'ms_per_image', label: 'ms / image' },
@@ -99,11 +219,20 @@ export default function Comparison({ metrics, plots }: { metrics: Metrics | null
       </Card>
 
       {/* ---------- detection ---------- */}
-      <Card title="Vehicle detection / localisation" subtitle="Three localisers on the unseen test set">
+      <Card title="Vehicle detection / localisation · Radar & Sensor Lock" subtitle="Three localisers on the unseen test set">
         {det ? (() => {
           const { series, rows } = pivot(det, [['mAP50', 'mAP@0.5'], ['mAP50_95', 'mAP@0.5:0.95'], ['mean_IoU', 'Mean IoU'], ['loc_acc_IoU50', 'Loc. acc (IoU≥0.5)']])
+          const ft = det.yolov8s_finetuned
           return (
             <>
+              {ft && (
+                <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  <Speedometer value={n(ft.mAP50)} label="mAP@0.5" sublabel="Fine-tuned YOLOv8s" color="#00f283" gear="RADAR" badge="LOCK · mAP50" />
+                  <Speedometer value={n(ft.mAP50_95)} label="mAP@0.5:0.95" sublabel="Strict box overlap" color="#21a4ff" gear="LIDAR" badge="PRECISION" />
+                  <Speedometer value={n(ft.mean_IoU)} label="Mean IoU" sublabel="Bounding-box overlap" color="#3df5a0" gear="BOX" badge="OVERLAP · IoU" />
+                  <Speedometer value={n(ft.loc_acc_IoU50)} label="Localisation Acc." sublabel="Share with IoU ≥ 0.5" color="#00f283" gear="LOCK" badge="TARGET LOCK" />
+                </div>
+              )}
               <GroupedBars data={rows} series={series.map((s) => ({ key: s.key, name: shortDetector[s.entity] ?? s.entity }))} fmt={(v) => pct(v)} />
               <div className="mt-5">
                 <DataTable

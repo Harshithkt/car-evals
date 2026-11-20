@@ -159,7 +159,7 @@ export default function Recognize({ health, current, history, commit, restore, c
                   drag ? 'scale-[1.01] border-ink bg-surface-2' : 'border-line hover:border-mist hover:bg-surface-2/60'
                 }`}
               >
-                <span className={`mb-3 flex h-12 w-12 items-center justify-center rounded-full transition-colors ${drag ? 'bg-accent text-white' : 'bg-surface-2 text-ink group-hover:bg-ink group-hover:text-white'}`}>
+                <span className={`mb-3 flex h-12 w-12 items-center justify-center rounded-full transition-colors ${drag ? 'bg-ink text-page' : 'bg-surface-2 text-ink group-hover:bg-ink group-hover:text-page'}`}>
                   <IconUpload className="h-5 w-5" />
                 </span>
                 <div className="text-sm font-medium text-ink">{busy ? 'Analysing…' : <>Drop an image, or <span className="text-ink">browse</span></>}</div>
@@ -308,6 +308,21 @@ export default function Recognize({ health, current, history, commit, restore, c
                   <img src={shown} alt={busy ? 'Uploaded image' : 'Recognition result'}
                     className={`h-auto max-h-[520px] w-full max-w-[760px] object-contain transition ${busy ? 'scale-[1.01] opacity-50 blur-[1px]' : ''}`} />
                 )}
+                {/* Automotive ADAS Corner HUD Brackets & Telemetry Overlay */}
+                {result && !busy && (
+                  <div className="pointer-events-none absolute inset-0 p-3 font-mono text-[10px] uppercase tracking-wider text-accent/90 print:hidden">
+                    <span className="absolute left-3 top-3 h-4 w-4 border-l-2 border-t-2 border-accent" />
+                    <span className="absolute right-3 top-3 h-4 w-4 border-r-2 border-t-2 border-accent" />
+                    <span className="absolute bottom-3 left-3 h-4 w-4 border-b-2 border-l-2 border-accent" />
+                    <span className="absolute bottom-3 right-3 h-4 w-4 border-b-2 border-r-2 border-accent" />
+                    <div className="inline-flex items-center gap-2 rounded bg-black/70 px-2 py-0.5 backdrop-blur-sm">
+                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-good" />
+                      <span>ADAS LOCK · {result.vehicles.length} TARGET{result.vehicles.length === 1 ? '' : 'S'}</span>
+                      <span className="text-muted">|</span>
+                      <span className="text-white">{result.image_size[0]}×{result.image_size[1]}PX</span>
+                    </div>
+                  </div>
+                )}
                 {busy && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
                     <span className="h-9 w-9 animate-spin rounded-full border-[3px] border-accent/25 border-t-accent" />
@@ -356,7 +371,7 @@ function Chip({ label, value, icon }: { label: string; value: string; icon?: boo
   )
 }
 
-function EmptyState({ onSample, allCars }: { onSample?: () => void; allCars: boolean }) {
+function EmptyState({ onSample, allCars = false }: { onSample?: () => void; allCars?: boolean }) {
   const steps = [
     ['Detect', 'YOLOv8 finds every vehicle, with classical fallbacks'],
     ['Classify', allCars ? 'ConvNeXt scores about 1,300 car generations from 1948 to 2026' : 'ConvNeXt + classical features score 196 classes'],
@@ -383,7 +398,7 @@ function EmptyState({ onSample, allCars }: { onSample?: () => void; allCars: boo
             ))}
           </ol>
           {onSample && (
-            <button onClick={onSample} className="mt-6 inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90">
+            <button onClick={onSample} className="mt-6 inline-flex items-center gap-2 btn-primary px-4 py-2 text-sm">
               <IconScan className="h-4 w-4" /> Try a sample image
             </button>
           )}

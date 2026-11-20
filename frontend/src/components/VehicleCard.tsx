@@ -5,7 +5,8 @@ import { pct } from '../lib/format'
 import { bodyType, indexByName, runnerUpInsight } from '../lib/classes'
 import { BarList } from './charts'
 import { IconAlert, IconCheck, IconHelp, IconInfo, IconSliders, IconSparkles } from './icons'
-import { Card, DET_SOURCE, Label, Meter, STATUS_COLOR, StatusBadge } from './ui'
+import { ChassisPlate, GearIndicator, ShiftLights, Speedometer } from './Speedometer'
+import { Card, DET_SOURCE, Label, STATUS_COLOR, StatusBadge } from './ui'
 
 const STATUS_BOX: Record<Status, string> = {
   confident: 'border-good/40 bg-good/8 text-good-ink',
@@ -109,6 +110,7 @@ export function VehicleCard({ v, index, total, preview, imageSize, classes, thre
             {llmLead
               ? <span className="inline-flex items-center gap-1 rounded-md border border-ink/30 bg-surface-2 px-2 py-0.5 text-xs font-medium text-ink"><IconSparkles className="h-3.5 w-3.5" /> Vision LLM answer</span>
               : <StatusBadge status={v.status} />}
+            <GearIndicator status={v.status} />
             {!llmLead && body !== 'Other' && <span className="rounded-md border border-line px-2 py-0.5 text-xs text-ink-2">{body}</span>}
           </div>
           {llmLead ? (
@@ -144,24 +146,60 @@ export function VehicleCard({ v, index, total, preview, imageSize, classes, thre
         </div>
       </div>
 
-      {!llmLead && (
-        <div className="mt-4">
-          <Meter value={v.confidence} color={STATUS_COLOR[v.status]} />
-        </div>
-      )}
+      {/* RPM Shift-Lights Bar */}
+      <div className="mt-4">
+        <ShiftLights
+          value={v.confidence}
+          segments={18}
+          label="Confidence Tachometer · RPM Shift Strip"
+          rightText={`CLASS ${pct(v.confidence)} · MAKE ${pct(v.make_confidence)} · DET ${pct(v.det_conf)}`}
+        />
+      </div>
 
-      <dl className="mt-5 grid grid-cols-[1fr_1.5fr_0.8fr] gap-2 text-sm sm:gap-3">
-        {(llmLead && a
-          ? [['Make', a.make, 'from the LLM'], ['Model', known(a.model) ? a.model : '—', null], ['Years', known(a.generation_or_years) ? a.generation_or_years : '—', null]]
-          : [['Make', v.make, `${pct(v.make_confidence)} make conf.`], ['Model', v.model, null], ['Year', v.year || '—', null]]
-        ).map(([k, val, note]) => (
-          <div key={k} className="min-w-0 rounded-xl border border-line bg-page px-3.5 py-2.5">
-            <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">{k}</dt>
-            <dd className={`mt-0.5 break-words font-medium ${confident || (llmLead && a) ? 'text-ink' : 'text-ink-2'}`}>{op.busy && llmLead ? '…' : val}</dd>
-            {note && <dd className="text-[11px] text-muted">{note}</dd>}
-          </div>
-        ))}
-      </dl>
+      {/* Live Cockpit Gauges for this Vehicle */}
+      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <Speedometer
+          value={v.confidence}
+          label="Exact Trim Confidence"
+          sublabel={`${v.make} ${v.model} (${v.year})`}
+          color={STATUS_COLOR[v.status]}
+          size={156}
+          gear={confident ? 'S+' : v.status === 'uncertain_model' ? 'M' : 'L'}
+          badge="RPM · CLASS"
+        />
+        <Speedometer
+          value={v.make_confidence}
+          label="Manufacturer Lock"
+          sublabel={`Brand: ${v.make_guess}`}
+          color="#00f283"
+          size={156}
+          gear="MAKE"
+          badge="BOOST · BRAND"
+        />
+        <Speedometer
+          value={v.det_conf}
+          label="Radar Box Lock"
+          sublabel={src.label}
+          color="#21a4ff"
+          size={156}
+          gear="YOLO"
+          badge="SENSOR · ROI"
+        />
+      </div>
+
+      {/* Stamped Metallic Chassis / VIN Spec Plate */}
+      <div className="mt-4">
+        <ChassisPlate
+          make={llmLead && a && known(a.make) ? a.make : confident ? v.make : v.make_guess}
+          model={llmLead && a && known(a.model) ? a.model : v.model}
+          year={llmLead && a && known(a.generation_or_years) ? a.generation_or_years : v.year}
+          body={llmLead && a && known(a.body_type) ? a.body_type : body}
+          classId={v.class_id}
+          detSource={src.label}
+          detConf={v.det_conf}
+          box={v.box}
+        />
+      </div>
 
       {llmLead ? (
         <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-line bg-surface-2/60 px-3.5 py-2.5 text-sm text-ink-2">
@@ -205,7 +243,7 @@ export function VehicleCard({ v, index, total, preview, imageSize, classes, thre
         {insight && insight.text && <RunnerUp insight={insight} />}
         <WhatIf v={v} thresholds={thresholds} />
       </div>
-      {llm && preview && imageSize && !llmLead && <LLMSecondOpinion v={v} op={op} />}
+      {preview && imageSize && !llmLead && <LLMSecondOpinion v={v} op={op} llmAvailable={llm} />}
     </Card>
   )
 }
@@ -296,7 +334,7 @@ async function cropBlob(src: string, box: number[], size: [number, number]): Pro
 
 /** Optional: ask a vision LLM about this crop. Useful for cars outside the trained class list; never used for the metrics.
  *  Shares its state with the card (`op`), so an automatic low-confidence call and this button never ask twice. */
-function LLMSecondOpinion({ v, op }: { v: Vehicle; op: ReturnType<typeof useLLMOpinion> }) {
+function LLMSecondOpinion({ v, op, llmAvailable = true }: { v: Vehicle; op: ReturnType<typeof useLLMOpinion>; llmAvailable?: boolean }) {
   const { res, err, busy, ask } = op
   const a = res?.answer
   const sameMake = a && a.make && a.make.toLowerCase() !== 'unknown'
@@ -306,15 +344,25 @@ function LLMSecondOpinion({ v, op }: { v: Vehicle; op: ReturnType<typeof useLLMO
     <div className="mt-4 rounded-xl border border-dashed border-line bg-page p-4 print:hidden">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
-          <div className="flex items-center gap-2 text-sm font-medium text-ink"><IconSparkles className="h-4 w-4" /> Second opinion from a vision LLM</div>
+          <div className="flex items-center gap-2 text-sm font-medium text-ink">
+            <IconSparkles className="h-4 w-4 text-accent" /> Second opinion from a vision LLM
+            {!llmAvailable && (
+              <span className="rounded-md border border-warning/40 bg-warning/10 px-2 py-0.5 font-mono text-[10px] font-semibold text-warning-ink">
+                NEBIUS_API_KEY NOT SET
+              </span>
+            )}
+          </div>
           <p className="mt-0.5 text-xs text-muted">
-            {v.status === 'confident' ? 'Optional. ' : 'Useful when the car may not be in the trained list (for example India-only models). '}
-            Sends only this crop to an LLM on Nebius. Its answer is not part of the evaluated system and can be wrong.
+            {v.status === 'confident' ? 'Optional. ' : 'Useful when the car may not be in the trained list (for example India-only models like Maruti Suzuki, Tata or Mahindra). '}
+            {llmAvailable
+              ? 'Sends only this crop to a vision LLM on Nebius (meta-models/muse-spark-open). Its answer is not part of the evaluated system and can be wrong.'
+              : 'Add NEBIUS_API_KEY=... to a .env file in the project root and restart the backend to enable automatic low-confidence fallback & on-demand vision LLM identification.'}
           </p>
         </div>
         {!res && (
           <button onClick={() => void ask()} disabled={busy}
-            className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-ink px-3 py-1.5 text-sm font-medium text-ink hover:bg-surface-2 disabled:opacity-50">
+            className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-sm font-medium text-ink hover:border-accent disabled:opacity-50">
+            <IconSparkles className="h-3.5 w-3.5 text-accent" />
             {busy ? 'Asking…' : 'Ask the LLM'}
           </button>
         )}

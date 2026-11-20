@@ -5,6 +5,7 @@ import { mb, ms, num, pct } from '../lib/format'
 import { BarList, GroupedBars, Lines } from '../components/charts'
 import { DataTable } from '../components/DataTable'
 import { IconArrowRight } from '../components/icons'
+import { Speedometer } from '../components/Speedometer'
 import { Card, Label, Missing, PageHeader, StatTile } from '../components/ui'
 
 const STATUS_NAME: Record<string, string> = { confident: 'Confident', uncertain_model: 'Uncertain model / year', low_confidence: 'Low confidence' }
@@ -43,12 +44,19 @@ export default function AllCars({ metrics, classes, onTry }: { metrics: CarsMetr
 
   return (
     <div className="space-y-5">
-      <PageHeader eyebrow="Evaluation" title="All-cars model"
-        actions={<button onClick={onTry} className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white hover:opacity-90">Try it on a photo <IconArrowRight className="h-4 w-4" /></button>}>
+      <PageHeader eyebrow="Evaluation · 1948–2026 Powertrain" title="All-cars model"
+        actions={<button onClick={onTry} className="inline-flex items-center gap-2 btn-primary px-5 py-2.5 text-sm">Try it on a photo <IconArrowRight className="h-4 w-4" /></button>}>
         A second classifier that names {d.classes?.toLocaleString() ?? 'about 1,300'} car generations from {d.years?.first ?? 1948} to 2026,
         including 2023 to 2026 models. It runs inside the same pipeline as the Stanford Cars model: YOLO detection, crop, illumination fix,
         ConvNeXt-Tiny with flip TTA, temperature calibration and the three-level decision rule. All numbers below are on test photos the model never saw.
       </PageHeader>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Speedometer value={t.top1} label="Generation Top-1" sublabel={`${t.n.toLocaleString()} unseen test photos`} color="#00f283" gear="S+" badge="RPM · GEN TOP-1" />
+        <Speedometer value={t.make_acc} label="Make Accuracy" sublabel={`${d.makes ?? '—'} manufacturers`} color="#21a4ff" gear="MAKE" badge="BOOST · BRAND" />
+        <Speedometer value={t.model_acc_any_generation} label="Model (Any Gen)" sublabel={`${d.models ?? '—'} distinct models`} color="#3df5a0" gear="MODEL" badge="TORQUE · MODEL" />
+        <Speedometer value={t.top5} label="Top-5 Recall" sublabel="Correct generation in top 5" color="#fab219" gear="1291" badge="REDLINE · TOP-5" />
+      </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         <StatTile label="Generation top-1" value={pct(t.top1)} note={`${t.n.toLocaleString()} test photos`} />
@@ -198,6 +206,47 @@ export default function AllCars({ metrics, classes, onTry }: { metrics: CarsMetr
           </p>
         </Card>
       </div>
+
+      {/* Vision LLM Bake-off Card (from docs/llm_bakeoff.md) */}
+      <Card
+        title="Vision-LLM Second Opinion Bake-Off · Out-of-Distribution & Indian-Market Cars"
+        subtitle="Evaluated on 30 Indian-market models (Maruti Suzuki, Tata, Mahindra, Kia, Hyundai, Skoda…) + 18 US/Stanford test cars via Nebius Token Factory"
+      >
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
+          <div>
+            <Label>Exact model accuracy on 30 Indian-market cars (Wikimedia Commons)</Label>
+            <BarList
+              max={1}
+              fmt={(v) => pct(v, 0)}
+              highlight={(l) => l.includes('muse-spark-open')}
+              items={[
+                { label: 'meta-models/muse-spark-open (Deployed default · 3.6s median)', value: 30 / 30 },
+                { label: 'deepseek-ai/DeepSeek-V4.1-Flash-1017 (5.9s median)', value: 26 / 30 },
+                { label: 'MiniMaxAI/MiniMax-M3 (3.2s median)', value: 24 / 30 },
+                { label: 'google/gemma-3-27b-it (Fallback · 2.8s median)', value: 22 / 30 },
+                { label: 'moonshotai/Kimi-K3.1-Pro (4.0s median)', value: 21 / 30 },
+                { label: 'openbmb/MiniCPM-V-4_5 (1.9s median)', value: 20 / 30 },
+                { label: 'MiniMaxAI/MiniMax-M3.1-Flash (4.2s median)', value: 18 / 30 },
+                { label: 'moonshotai/Kimi-K2.6 (5.2s median)', value: 17 / 30 },
+              ]}
+            />
+          </div>
+          <div className="space-y-3 self-center text-[13px] leading-[1.6] text-ink-2">
+            <div className="grid grid-cols-2 gap-3">
+              <StatTile label="Indian cars (Test 1)" value="30 / 30" note="muse-spark-open · 100% exact" />
+              <StatTile label="US & Stanford (Test 2)" value="18 / 18" note="muse-spark-open · 100% exact" />
+            </div>
+            <p>
+              When the trained classifier reports <strong className="text-ink">low confidence</strong> (typically a car outside its 1,291 classes, such as
+              Tata Nexon, Mahindra Thar, XUV700, Maruti Swift/Brezza/Dzire, or Hyundai Creta), the app automatically sends the detected vehicle crop to{' '}
+              <code className="text-ink">meta-models/muse-spark-open</code> on Nebius (or lets you click <strong className="text-ink">Ask the LLM</strong> on any result).
+            </p>
+            <p className="text-xs text-muted">
+              Set <code className="text-ink">NEBIUS_API_KEY</code> in <code className="text-ink">.env</code> in the project root to enable live LLM queries.
+            </p>
+          </div>
+        </div>
+      </Card>
 
       <Card title="Most confident mistakes" subtitle="Test photos the model got wrong while sure of itself. Photo credits under each image.">
         {failures === null ? <div className="h-40 animate-pulse rounded-xl bg-surface-2" /> : failures.length ? (

@@ -88,7 +88,7 @@ export default function App() {
     api.health(model).then((h) => { setHealth(h); setHealthErr(null) }).catch((e) => setHealthErr(String(e.message ?? e)))
   }, [model])
 
-  useEffect(() => { loadHealth() }, [loadHealth])   // again whenever the model changes
+  useEffect(() => { loadHealth() }, [loadHealth])
 
   useEffect(() => {
     api.metrics().then(setMetrics).catch(() => setMetrics({}))
@@ -96,12 +96,10 @@ export default function App() {
     api.plots().then(setPlots).catch(() => setPlots([]))
   }, [])
 
-  // the server may not have the stored model (e.g. an old deployment): fall back to its default
   useEffect(() => {
     if (health?.models && !health.models.some((m) => m.id === model) && health.default_model) setModel(health.default_model)
   }, [health, model, setModel])
 
-  // the other model loads in the background on the server: poll until it is ready
   useEffect(() => {
     if (!health?.models?.some((m) => !m.loaded && !m.error)) return
     const t = setTimeout(loadHealth, 3000)
@@ -156,14 +154,14 @@ export default function App() {
   const go = (tab: string) => { window.location.hash = `/app/${tab}` }
   const home = () => { window.location.hash = '/' }
 
-  if (route.view === 'landing') return <Landing metrics={metrics} carsMetrics={carsMetrics} health={health} go={go} />
+  if (route.view === 'landing') return <Landing metrics={metrics} carsMetrics={carsMetrics} health={health} healthErr={healthErr} go={go} />
 
   const tab = route.tab
   const modelInfo = health?.models?.find((m) => m.id === model)
   const nClasses = modelInfo?.classes ?? (classes.length || null)
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-40 border-b border-line bg-surface/85 backdrop-blur-md print:hidden">
+      <header className="site-header print:hidden">
         <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4 sm:gap-4 sm:px-6">
           <button onClick={home} className="flex shrink-0 items-center gap-2.5 rounded-lg pr-2" title="Back to the home page">
             <LogoMark className="h-8 w-8" />
@@ -255,7 +253,7 @@ function ModelSwitch({ model, setModel, health }: { model: ModelId; setModel: (m
         const active = model === o.id
         return (
           <button key={o.id} role="radio" aria-checked={active} onClick={() => setModel(o.id)} title={o.title + (loading ? ' (still loading on the server)' : '')}
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-medium transition-colors ${active ? 'bg-ink text-surface' : 'text-ink-2 hover:text-ink'}`}>
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-medium transition-colors ${active ? 'bg-ink text-page' : 'text-ink-2 hover:text-ink'}`}>
             {o.short}
             {loading && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-current opacity-70" aria-label="loading" />}
           </button>
@@ -281,6 +279,11 @@ function HealthPill({ health, err, onRetry }: { health: Health | null; err: stri
       </span>
       <span className="font-medium text-ink">{health.model_loaded ? 'Model ready' : 'Model not loaded'}</span>
       {health.device && <span className="hidden text-muted sm:inline">{health.device.toUpperCase()} · {health.backend}</span>}
+      {health.llm_available && (
+        <span className="hidden items-center gap-1 rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-semibold text-accent md:inline-flex" title="Vision LLM second opinion enabled (Nebius)">
+          <IconSparkles className="h-3 w-3" /> VLM
+        </span>
+      )}
     </span>
   )
 }

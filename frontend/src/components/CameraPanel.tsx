@@ -130,7 +130,7 @@ export function CameraPanel({ busy, result, onCapture }: {
 
       {stream && (
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <button onClick={() => capture(false)} disabled={busy} className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50">
+          <button onClick={() => capture(false)} disabled={busy} className="inline-flex items-center gap-2 btn-primary px-4 py-2 text-sm disabled:opacity-50">
             <IconCamera className="h-4 w-4" /> {busy ? 'Analysing…' : 'Capture & recognise'}
           </button>
           <Toggle checked={live} onChange={setLive} label="Live mode" />

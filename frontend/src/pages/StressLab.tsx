@@ -151,7 +151,7 @@ export default function StressLab({ current }: { current: Analysis | null }) {
                 </label>
                 <p className="mt-2 text-xs text-muted">{kindInfo.desc}</p>
                 <div className="mt-5 flex flex-wrap gap-2">
-                  <button onClick={runCompare} disabled={!!busy || !baseline} className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50">
+                  <button onClick={runCompare} disabled={!!busy || !baseline} className="inline-flex items-center gap-2 btn-primary px-4 py-2.5 text-sm disabled:opacity-50">
                     <IconCompare className="h-4 w-4" /> {busy === 'compare' ? 'Running…' : 'Compare with original'}
                   </button>
                   <button onClick={runSweep} disabled={!!busy || !baseline} className="inline-flex items-center gap-2 rounded-lg border border-line px-4 py-2.5 text-sm font-medium text-ink hover:bg-surface-2 disabled:opacity-50">

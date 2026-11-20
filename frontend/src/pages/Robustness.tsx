@@ -4,6 +4,7 @@ import { conditionLabel, signedPts, thresholdRows } from '../lib/metrics'
 import { GroupedBars, Lines } from '../components/charts'
 import { DataTable } from '../components/DataTable'
 import { Plot } from '../components/Plot'
+import { Speedometer } from '../components/Speedometer'
 import { Card, Missing, PageHeader, StatTile, StatusBadge } from '../components/ui'
 
 const n = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : null)
@@ -62,18 +63,49 @@ export default function Robustness({ metrics, plots }: { metrics: Metrics | null
               </p>
             )}
             {breakdown && (
-              <div className="mt-4">
-                <DataTable
-                  data={Object.fromEntries(Object.entries(breakdown).sort(([a], [b]) => ['confident', 'uncertain_model', 'low_confidence'].indexOf(a) - ['confident', 'uncertain_model', 'low_confidence'].indexOf(b)))}
-                  firstCol="Decision"
-                  renderName={(s) => (['confident', 'uncertain_model', 'low_confidence'].includes(s) ? <StatusBadge status={s as Status} /> : humanize(s))}
-                  columns={[
-                    { key: 'share', label: 'Share of test images' },
-                    { key: 'model_acc', label: 'Exact-class accuracy' },
-                    { key: 'make_acc', label: 'Make accuracy' },
-                  ]}
-                />
-              </div>
+              <>
+                <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <Speedometer
+                    value={n(breakdown.confident?.model_acc)}
+                    label="Confident Tier Accuracy"
+                    sublabel={`${pct(breakdown.confident?.share)} of test set (p ≥ τ)`}
+                    color="#00f283"
+                    gear="S+"
+                    badge="CONFIDENT · ACC"
+                    size={168}
+                  />
+                  <Speedometer
+                    value={n(breakdown.confident?.make_acc)}
+                    label="Confident Make Accuracy"
+                    sublabel="Manufacturer precision in S+ gear"
+                    color="#21a4ff"
+                    gear="S+"
+                    badge="BRAND · LOCK"
+                    size={168}
+                  />
+                  <Speedometer
+                    value={n(breakdown.uncertain_model?.make_acc)}
+                    label="Uncertain Tier Make Acc."
+                    sublabel={`${pct(breakdown.uncertain_model?.share)} of test set (p_make ≥ τ_make)`}
+                    color="#fab219"
+                    gear="M"
+                    badge="FALLBACK · MAKE"
+                    size={168}
+                  />
+                </div>
+                <div className="mt-4">
+                  <DataTable
+                    data={Object.fromEntries(Object.entries(breakdown).sort(([a], [b]) => ['confident', 'uncertain_model', 'low_confidence'].indexOf(a) - ['confident', 'uncertain_model', 'low_confidence'].indexOf(b)))}
+                    firstCol="Decision"
+                    renderName={(s) => (['confident', 'uncertain_model', 'low_confidence'].includes(s) ? <StatusBadge status={s as Status} /> : humanize(s))}
+                    columns={[
+                      { key: 'share', label: 'Share of test images' },
+                      { key: 'model_acc', label: 'Exact-class accuracy' },
+                      { key: 'make_acc', label: 'Make accuracy' },
+                    ]}
+                  />
+                </div>
+              </>
             )}
             {thresholdRows(conf.threshold_table).length > 0 && (
               <div className="mt-5">

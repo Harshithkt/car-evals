@@ -138,7 +138,7 @@ export default function Batch({ items, setItems, maxMb, hasOnnx }: {
               </button>
             ) : (
               <button onClick={runAll} disabled={!items.some((i) => i.state === 'queued' || i.state === 'error')}
-                className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white hover:opacity-90 disabled:opacity-40">
+                className="inline-flex items-center gap-2 btn-primary px-4 py-2.5 text-sm disabled:opacity-40">
                 <IconPlay className="h-4 w-4" /> Analyse {items.filter((i) => i.state === 'queued' || i.state === 'error').length || ''} image{items.filter((i) => i.state === 'queued' || i.state === 'error').length === 1 ? '' : 's'}
               </button>
             )}
